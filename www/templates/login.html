@@ -1,0 +1,28 @@
+<ion-view view-title="My account">
+  <ion-content>
+    <div ng-if="!loggedIn()">
+      <form ng-submit="login()">
+        <div class="card">
+          <div class="item item-text-wrap">
+            Sign in or sign up to connect to your Rayyan account
+          </div>
+        </div>
+        <label class="item">
+          <button class="button button-block button-positive" type="submit">Sign in to Rayyan</button>
+        </label>
+      </form>
+    </div>
+    <div ng-if="loggedIn()">
+      <form ng-submit="logout()">
+        <div class="card">
+          <div class="item item-text-wrap">
+            You are currently signed in as <span class="item-strong-true">{{getDisplayName()}}</span>.
+          </div>
+        </div>
+        <label class="item">
+          <button class="button button-block button-assertive" type="submit">Sign out and delete all data</button>
+        </label>
+      </form>
+    </div>
+  </ion-content>
+</ion-view>
