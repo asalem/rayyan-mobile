@@ -14,12 +14,15 @@
 
   <ion-side-menu side="left">
     <ion-header-bar class="bar-stable">
-      <h1 class="title">Rayyan</h1>
+      <h1 class="title">Rayyan QCRI</h1>
     </ion-header-bar>
     <ion-content>
-      <ion-list>
-        <ion-item menu-close href="#/app/login">
-          My account
+      <ion-list ng-controller="LoginCtrl">
+        <ion-item menu-close href="#/app/login" ng-if="!loggedIn()">
+          Sign in
+        </ion-item>
+        <ion-item menu-close href="#/app/login" ng-if="loggedIn()">
+          {{getDisplayName()}}
         </ion-item>
         <ion-item menu-close href="#/app/reviews">
           Reviews
@@ -36,4 +39,28 @@
       </ion-list>
     </ion-content>
   </ion-side-menu>
+
+  <ion-side-menu side="right" delegate-handle="labelsMenu" ng-controller="LabelsCtrl">
+    <ion-header-bar class="bar bar-header bar-{{labelsTitleClass}}">
+      <label class="item item-input-wrapper">
+        <i class="icon ion-ios-search placeholder-icon"></i>
+        <input type="search" placeholder="Search or create" class="search-box"
+        ng-model="searchCriteria">
+      </label>
+      <button class="button button-clear" ng-click="searchCriteria=''">
+        Clear
+      </button>
+    </ion-header-bar>
+    <ion-content delegate-handle="labelsContent">
+      <ion-list>
+        <ion-checkbox href="#" 
+          ng-repeat="label in labels | filter: filterAndDetectExactMatch"
+          ng-model="labelModels[label]">{{label}}</ion-checkbox>
+        <ion-checkbox ng-if="!exactMatch && searchCriteria!=''" href="#"
+          ng-model="labelModels[searchCriteria]">{{searchCriteria}} (new)</ion-checkbox>
+      </ion-list>
+    </ion-content>
+  </ion-side-menu>
+
+
 </ion-side-menus>

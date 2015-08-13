@@ -1,6 +1,67 @@
-<ion-view view-title="Review Title">
+<ion-view view-title="{{review.title}}">
+  <ion-nav-buttons side="secondary">
+    <button class="button button-icon icon ion-funnel"></button>
+    <button ng-if="showBlind" class="button button-icon icon {{blindIcon()}}" ng-click="blindClicked()"></button>
+  </ion-nav-buttons>
   <ion-content>
-    an article goes here
-  </ion-content>
-</ion-view>
+    <div class="list card">
+      <div class="item item-body">
+        <h1>{{article.title}}</h1>
+        <p>
+        {{article.authors}}<br/>{{article.date}}
+        </p>
+      </div>
 
+      <div class="item item-body">
+        <h2>
+          {{article.abstract}}
+        </h2>
+        <p>
+          <div class="labels-container">
+            <span ng-repeat="(key, value) in article.included" class="article-label label-included-{{value}}">{{key}}</span>
+          </div>
+          <div class="labels-container">
+            <span ng-repeat="label in article.labels" class="article-label article-user-label">{{label}}</span>
+          </div>
+          <div class="labels-container labels-container-reasons">
+            <span ng-repeat="label in article.reasons" class="article-label article-exclusion-label">{{label}}</span>
+          </div>
+        </p>
+      </div>
+
+      <div class="row padding">
+        <button class="col button button-large button-balanced icon-left ion-thumbsup">
+          Include
+        </button>
+        <button class="col col-offset-10 button button-large button-assertive icon-left ion-thumbsdown">
+          Exclude
+        </button>
+      </div>
+
+      <div class="row padding">&nbsp;</div>
+
+      <div class="row padding">
+        <button class="col button button-large button-outline button-positive"
+        ng-click="labelClicked()">
+          Label
+        </button>
+        <button class="col col-offset-10 button button-large button-outline button-assertive"
+        ng-click="reasonClicked()">
+          Reason
+        </button>
+      </div>
+
+      <div class="button-bar">
+        <button class="button button-clear button-dark" ng-click="advance(false)">
+          Previous
+        </button>
+        <button class="button button-clear button-dark" ng-click="advance(true)">
+          Next
+        </button>
+      </div>
+
+    </div>
+
+  </ion-content>
+
+</ion-view>

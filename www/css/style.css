@@ -6,3 +6,46 @@
 .item-italic-true {
   font-style: italic;
 }
+
+.labels-container {
+  margin-bottom: 5px;
+  /*word-break: keep-all;*/
+}
+
+.labels-container-reasons {
+  margin-top: 6px;
+}
+
+.article-label {
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 5px;
+  color: white;
+  margin-right: 5px;
+  line-height: 26px;
+  /*word-wrap: normal;*/
+}
+
+.article-user-label {
+  background-color: blue;
+}
+
+.article-exclusion-label {
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  line-height: 28px;
+}
+
+.label-included-true {
+  background-color: green;
+}
+
+.label-included-false {
+  background-color: red;  
+}
+
+.search-box {
+  background-color: inherit;
+}

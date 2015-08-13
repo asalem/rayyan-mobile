@@ -53,7 +53,7 @@ angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.se
   })
 
   .state('app.article', {
-    url: '/article/:articleId',
+    url: '/reviews/:reviewId/article',
     views: {
       'menuContent': {
         templateUrl: 'templates/article.html',
