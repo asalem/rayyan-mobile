@@ -1,7 +1,13 @@
 {
-  "name": "HelloIonic",
+  "name": "rayyan-mobile",
   "private": "true",
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#1.0.1"
+  },
+  "dependencies": {
+    "persistence": "hammady/persistencejs#master",
+    "ngstorage": "~0.3.7",
+    "underscore": "~1.8.3",
+    "requirejs": "~2.1.20"
   }
 }

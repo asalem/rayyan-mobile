@@ -3,7 +3,7 @@
     <ion-refresher on-refresh="doRefresh()">                   
     </ion-refresher>
     <ion-list>
-      <ion-item href="#" ng-click="reviewClicked({{review.id}})"
+      <ion-item href="#" ng-click="reviewClicked({{review.rayyan_id}})"
       class="item item-icon-right" ng-repeat="review in reviews">
         <span class="item-italic-{{!review.owner}}">
           {{review.title}} ({{review.total_articles}} articles)

@@ -17,7 +17,7 @@
       <h1 class="title">Rayyan QCRI</h1>
     </ion-header-bar>
     <ion-content>
-      <ion-list ng-controller="LoginCtrl">
+      <ion-list ng-controller="LoginController">
         <ion-item menu-close href="#/app/login" ng-if="!loggedIn()">
           Sign in
         </ion-item>
@@ -40,7 +40,7 @@
     </ion-content>
   </ion-side-menu>
 
-  <ion-side-menu side="right" delegate-handle="labelsMenu" ng-controller="LabelsCtrl">
+  <ion-side-menu side="right" delegate-handle="labelsMenu" ng-controller="LabelsController">
     <ion-header-bar class="bar bar-header bar-{{labelsTitleClass}}">
       <label class="item item-input-wrapper">
         <i class="icon ion-ios-search placeholder-icon"></i>

@@ -3,22 +3,29 @@
     <button class="button button-icon icon ion-funnel"></button>
     <button ng-if="showBlind" class="button button-icon icon {{blindIcon()}}" ng-click="blindClicked()"></button>
   </ion-nav-buttons>
-  <ion-content>
-    <div class="list card">
+  <ion-content delegate-handle="articlesContent">
+
+    <div class="list card" ng-repeat="article in articles">
       <div class="item item-body">
-        <h1>{{article.title}}</h1>
+        <div class="article-title">{{article.title}}</div>
         <p>
-        {{article.authors}}<br/>{{article.date}}
+        Authors: {{article.authors}}
+        </p>
+        <p>
+        Journal: {{article.citation}}
         </p>
       </div>
 
       <div class="item item-body">
+        <p>
+        Abstract:
+        </p>
         <h2>
-          {{article.abstract}}
+          {{article.full_abstract}}
         </h2>
         <p>
           <div class="labels-container">
-            <span ng-repeat="(key, value) in article.included" class="article-label label-included-{{value}}">{{key}}</span>
+            <span class="article-label label-included-{{article.included}}">{{article.included === true ? 'Included' : (article.included === false ? 'Excluded' : '')}}</span>
           </div>
           <div class="labels-container">
             <span ng-repeat="label in article.labels" class="article-label article-user-label">{{label}}</span>
@@ -42,26 +49,24 @@
 
       <div class="row padding">
         <button class="col button button-large button-outline button-positive"
-        ng-click="labelClicked()">
+        ng-click="labelClicked(article)">
           Label
         </button>
         <button class="col col-offset-10 button button-large button-outline button-assertive"
-        ng-click="reasonClicked()">
+        ng-click="reasonClicked(article)">
           Reason
-        </button>
-      </div>
-
-      <div class="button-bar">
-        <button class="button button-clear button-dark" ng-click="advance(false)">
-          Previous
-        </button>
-        <button class="button button-clear button-dark" ng-click="advance(true)">
-          Next
         </button>
       </div>
 
     </div>
 
+
+    <ion-infinite-scroll ng-if="!noMoreArticlesAvailable" on-infinite="loadMore()" distance="10%"></ion-infinite-scroll>
+  
+    <div ng-if="noMoreArticlesAvailable" class="item item-body">
+      Congratulations, no more articles to screen. If there is no filter
+      then you are done, Yay! If there is filter, change filter to get more.
+    </div>
   </ion-content>
 
 </ion-view>
