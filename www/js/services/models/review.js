@@ -46,7 +46,10 @@ M.setReviews = function(reviews, $q) {
       }
       else {
         // not found in newReviews, must have been deleted remotely, delete locally
-        console.log("deleting local review", localReview)
+        console.log("deleting local review cascading articles", localReview)
+        // cascade delete articles and customizations
+        M.removeArticles(localReview.articles, $q)
+        M.removeCustomizations(localReview.customizations, $q)
         persistence.remove(localReview)
       }
     })

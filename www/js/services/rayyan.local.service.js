@@ -68,11 +68,9 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     },
     logout: function() {
       $localStorage.$reset();
-      // destroy all data by rolling back to the start then migrating to the end
       getReady().then(function(){
-        rollbackAllMigrations(function(){
-          initialized = false
-        });
+        // cascade destroying all reviews/articles/customizations
+        M.setReviews([], $q)
       })
     },
     loggedIn: function() {
