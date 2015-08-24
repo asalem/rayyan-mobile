@@ -119,7 +119,7 @@ angular.module('articles.controller', ['rayyan.services'])
     labelPrefix = ""
     $rootScope.labelModels = generateLabelModels(
       $scope.labels, originalArticleLabels)
-    $rootScope.labels = $scope.labels
+    $rootScope.labels = _.uniq($scope.labels.concat(originalArticleLabels))
     $rootScope.labelsTitle = 'Labels'
     $rootScope.labelsTitleClass = 'positive'
     console.log("scopeModels", $rootScope.labelModels)
@@ -132,7 +132,7 @@ angular.module('articles.controller', ['rayyan.services'])
     labelPrefix = "__EXR__"
     $rootScope.labelModels = generateLabelModels(
       $scope.reasons, originalArticleLabels)
-    $rootScope.labels = $scope.reasons
+    $rootScope.labels = _.uniq($scope.reasons.concat(originalArticleLabels))
     $rootScope.labelsTitle = 'Exclusion Reasons'
     $rootScope.labelsTitleClass = 'assertive'
     console.log("scopeModels", $rootScope.labelModels)

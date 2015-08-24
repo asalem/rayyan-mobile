@@ -46,6 +46,18 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     return deferred.promise;
   }
 
+  var getLabels = function(reviewId) {
+    // TODO local/remote trick
+    return rayyanRemoteService.getLabels(reviewId)
+      .then(function(labels){
+        return labels;
+      }, function(){
+        // on error, return empty array
+        // TODO: return local labels
+        return [];
+      })
+  }
+
   return {
     login: function() {
       // if browser, cheat login
@@ -62,7 +74,7 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     getDisplayName: rayyanLocalService.getDisplayName,
     getReviews: getReviews,
     getReview: rayyanLocalService.getReview,
-    getLabels: rayyanRemoteService.getLabels, // TODO local/remote trick
+    getLabels: getLabels,
     getArticles: getArticles,
     customizeArticle: function(reviewId, articleId, key, value) {
 
