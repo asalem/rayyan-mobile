@@ -61,10 +61,7 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
   return {
     login: function() {
       // if browser, cheat login
-      (!window.cordova ? rayyanLocalService.login() : rayyanRemoteService.login())
-      .then(function(){
-        getReviews();
-      })
+      !window.cordova ? rayyanLocalService.login() : rayyanRemoteService.login();
     },
     logout: function() {
       rayyanRemoteService.logout()
