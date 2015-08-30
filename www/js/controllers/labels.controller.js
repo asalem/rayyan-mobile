@@ -1,6 +1,7 @@
 angular.module('labels.controller', [])
 
 .controller('LabelsController', function($rootScope, $scope, $ionicScrollDelegate) {
+
   $rootScope.$on('menuOpen', function(e) {
     $scope.searchCriteria = ''  
   })

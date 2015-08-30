@@ -8,6 +8,7 @@
     "persistence": "hammady/persistencejs#master",
     "ngstorage": "~0.3.7",
     "underscore": "~1.8.3",
-    "requirejs": "~2.1.20"
+    "requirejs": "~2.1.20",
+    "angular-chart.js": "~0.7.6"
   }
 }

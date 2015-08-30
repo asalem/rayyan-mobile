@@ -1,7 +1,7 @@
 angular.module('articles.controller', ['rayyan.services'])
 
 .controller('ArticleController', function($rootScope, $scope, $stateParams, rayyanAPIService, $ionicSideMenuDelegate) {
-  var BATCH_SIZE = 3;
+  var BATCH_SIZE = 10;
   var STANDARD_EXCLUSION_REASONS = [
     'wrong outcome',
     'wrong drug',
@@ -18,8 +18,9 @@ angular.module('articles.controller', ['rayyan.services'])
   if (!review)
     review = rayyanAPIService.getReview(reviewId)
 
-  var originalArticleLabels, labelPrefix
+  var originalArticleLabels, labelPrefix;
   var articlesOffset = 0;
+  var articleToLabel;
 
   $scope.review = review
   
@@ -55,6 +56,9 @@ angular.module('articles.controller', ['rayyan.services'])
 
   $scope.loadMore = function() {
     console.log("in loadMore")
+    $scope.errorLoadingMore = false;
+    $scope.download_pending = false;
+
     rayyanAPIService.getArticles(review, articlesOffset, BATCH_SIZE)
       .then(function(articles){
         console.log("resolved by articles", articles)
@@ -62,7 +66,16 @@ angular.module('articles.controller', ['rayyan.services'])
           $scope.noMoreArticlesAvailable = true;
         else
           appendArticlesToScope(articles)
-      }, null, function(articles){
+      }, function(error){
+        $scope.noMoreArticlesAvailable = true;
+        switch(error) {
+          case "download_pending":
+            $scope.download_pending = true
+            break;
+          default:
+            $scope.errorLoadingMore = true;
+        }
+      }, function(articles){
         console.log("notified by articles", articles)
         appendArticlesToScope(articles);
       })
@@ -98,19 +111,48 @@ angular.module('articles.controller', ['rayyan.services'])
     return models
   }
 
+  var updatePendingJournalActionsCount = function(increment) {
+    $rootScope.pendingActionsCount += increment;
+    console.log("incrementing pendingActionsCount by", increment)
+  }
+
+  var applyCustomization = function(review, article, plan) {
+    var notified = 0
+    rayyanAPIService.applyCustomization(review, article, plan)
+      .then(
+        function(count) { // update on success
+          updatePendingJournalActionsCount(count - notified)
+        },
+        function(count) { // update on failure
+          updatePendingJournalActionsCount(count - notified)
+        },
+        function(count) { // update on notify
+          notified = count
+          updatePendingJournalActionsCount(count)
+        }
+      )
+  }
+
   var applyLabelModels = function(labelModels, originalArticleLabels, labelPrefix) {
-    var plan = []
+    var plan = {}
+
+    var pushAction = function(label, value) {
+      plan[labelPrefix + label] = value
+    }
+
     _.each(originalArticleLabels, function(label){
       if (labelModels[label])
         delete labelModels[label]
       else
-        plan.push({key: labelPrefix + label, value: -1})
+        pushAction(label, -1)
     })
     _.each(labelModels, function(value, label){
-      if (value) plan.push({key: labelPrefix + label, value: 1})
+      if (value) pushAction(label, 1);
     })
-    // TODO send plan to rayyanAPIservice and refresh menu (automagically?)
+
+    // send plan to rayyanAPIservice and refresh menu
     console.log("labeling plan", plan)
+    applyCustomization(review, articleToLabel, plan)
   }
 
   $scope.labelClicked = function(article) {
@@ -122,6 +164,7 @@ angular.module('articles.controller', ['rayyan.services'])
     $rootScope.labels = _.uniq($scope.labels.concat(originalArticleLabels))
     $rootScope.labelsTitle = 'Labels'
     $rootScope.labelsTitleClass = 'positive'
+    articleToLabel = article
     console.log("scopeModels", $rootScope.labelModels)
     $ionicSideMenuDelegate.toggleRight()
   }
@@ -135,8 +178,13 @@ angular.module('articles.controller', ['rayyan.services'])
     $rootScope.labels = _.uniq($scope.reasons.concat(originalArticleLabels))
     $rootScope.labelsTitle = 'Exclusion Reasons'
     $rootScope.labelsTitleClass = 'assertive'
+    articleToLabel = article
     console.log("scopeModels", $rootScope.labelModels)
     $ionicSideMenuDelegate.toggleRight()
+  }
+
+  $scope.includedClicked = function(article, value) {
+    applyCustomization(review, article, {included: value})
   }
 
   $scope.$watch(function() {return $ionicSideMenuDelegate.isOpen(); }, function(isOpen, wasOpen) {

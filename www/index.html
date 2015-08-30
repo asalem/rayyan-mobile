@@ -6,6 +6,7 @@
     <title></title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="lib/angular-chart.js/dist/angular-chart.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 
     <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
@@ -20,6 +21,8 @@
     <script src="lib/persistence/lib/persistence.store.websql.js"></script>
     <script src="lib/persistence/lib/persistence.store.cordovasql.js"></script>
     <script src="lib/persistence/lib/persistence.migrations.js"></script>
+    <script src="lib/Chart.js/Chart.min.js"></script>
+    <script src="lib/angular-chart.js/dist/angular-chart.min.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
@@ -28,12 +31,14 @@
     <script src="js/services/migrations/001.create.review.js"></script>
     <script src="js/services/migrations/002.create.article.js"></script>
     <script src="js/services/migrations/003.create.customization.js"></script>
+    <script src="js/services/migrations/004.create.journal.js"></script>
     <script>
         M = {}  // to wrap all model definitions, better done through angular service/require
     </script>
     <script src="js/services/models/review.js"></script>
     <script src="js/services/models/article.js"></script>
     <script src="js/services/models/customization.js"></script>
+    <script src="js/services/models/journal.js"></script>
     <script src="js/services/rayyan.local.service.js"></script>
 
     <script src="js/services/rayyan.remote.service.js"></script>    
@@ -42,6 +47,7 @@
     <script src="js/controllers/reviews.controller.js"></script>
     <script src="js/controllers/articles.controller.js"></script>
     <script src="js/controllers/labels.controller.js"></script>
+    <script src="js/controllers/footer.controller.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/app.js"></script>
   </head>
@@ -49,5 +55,13 @@
   <body ng-app="rayyan">
     <ion-nav-bar></ion-nav-bar>
     <ion-nav-view></ion-nav-view>
+    <ion-footer-bar class="bar bar-footer connection-footer connection-{{connectionStatus}}" align-title="left"
+    ng-controller="FooterController" ng-click="footerClicked()">
+        {{footerText}}
+        &nbsp;
+        <ion-spinner ng-if="journalProcessing" class="journal-processing-pending"></ion-spinner>
+        <span class="pending-actions-count">{{pendingActionsText()}}</span>
+    </ion-footer-bar>
+
   </body>
 </html>

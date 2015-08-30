@@ -44,10 +44,12 @@ M.assignCustomizations = function(review, articles, $q) {
           console.log("assigning customization", customization)
           if (customization.key == 'included')
             article.included = customization.value > 0;
-          else if (M.labelPredicate(customization.key))
-            article.labels.push(customization.key)
-          else
-            article.reasons.push(M.cleanExclusionReason(customization.key))
+          else if (customization.value > 0) {
+            if (M.labelPredicate(customization.key))
+              article.labels.push(customization.key)
+            else
+              article.reasons.push(M.cleanExclusionReason(customization.key))
+          }
         })
       })
       deferred.resolve();
@@ -68,33 +70,38 @@ M.groupCustomizationsByArticle = function(customizations) {
   return customizationsHash;
 }
 
-// M.getReviews = function($q) {
-//   var deferred = $q.defer()
-//   M.Review.all().order("rayyan_id", true).list(null, function(reviews){
-//     deferred.resolve(reviews);
-//   })
-//   return deferred.promise
-// }
+M.setCustomizations = function(review, article, plan, $q) {
+  var deferred = $q.defer()
+  var seenActions = {}
+  // load existing customizations
+  review.customizations
+    .filter("article_id", "=", article.rayyan_id)
+    .list(null, function(customizations){
+      // for each existing customization, see if needs updating according to plan
+      _.each(customizations, function(customization){
+        if (plan[customization.key]) {
+          customization.value = plan[customization.key]
+          seenActions[customization.key] = true
+        }
+      })
+      // for the unseen plan actions, insert as new customizations
+      _.each(plan, function(value, key){
+        console.log("checking seenActions for key", key)
+        if (!seenActions[key]) {
+          var c = new M.Customization({key: key, value: value, review_id: review.rayyan_id, article_id: article.rayyan_id})
+          c.review = review
+          article.customizations.add(c)
+        }
+      })
 
-// M.getReview = function(reviewId, $q) {
-//   var deferred = $q.defer()
-//   M.Review.all().filter("rayyan_id", "=", reviewId).one(null, function(review){
-//     deferred.resolve(review);
-//   })
-//   return deferred.promise
-// }
+      // flush
+      persistence.flush(function(){
+        M.assignCustomizations(review, [article], $q)
+          .then(function(){
+            deferred.resolve();
+          })
+      })
+    })
 
-// M.setReviews = function(reviews, $q) {
-//   var deferred = $q.defer()
-//   M.Review.all().destroyAll(null, function(){
-//     _.each(reviews, function(review){
-//       persistence.add(new M.Review(review))
-//     })
-//     persistence.flush(function(){
-//       M.getReviews($q).then(function(reviews){
-//         deferred.resolve(reviews);
-//       })
-//     });
-//   })
-//   return deferred.promise
-// }
+    return deferred.promise;
+}

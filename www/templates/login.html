@@ -1,28 +1,33 @@
 <ion-view view-title="My account">
-  <ion-content>
+  <ion-content class="has-footer">
     <div ng-if="!loggedIn()">
-      <form ng-submit="login()">
-        <div class="card">
-          <div class="item item-text-wrap">
-            Sign in or sign up to connect to your Rayyan account
-          </div>
+      <div class="card">
+        <div class="item item-text-wrap">
+           Rayyan is a 100% FREE web application to help systematic review authors screen citations in a quick, easy and enjoyable fashion. With this mobile app, you can download full reviews then screen them offline while you are riding the bus.
+           Once connected, the app will automatically sync back to the Rayyan servers!
+        </div>
+      </div>
+      <div class="card">
+        <label class="item">
+          <button class="button button-block button-positive" ng-click="login(false)">Sign in/up to Rayyan</button>
+        </label>
+        <div class="item item-text-wrap">
+          Wanna give it a test drive first? No problem, just sign in to the demo account. Use demo@example.com for email and demo1234 for password.
         </div>
         <label class="item">
-          <button class="button button-block button-positive" type="submit">Sign in to Rayyan</button>
+          <button class="button button-block button-dark" ng-click="login(true)">Demo sign in</button>
         </label>
-      </form>
+      </div>
     </div>
     <div ng-if="loggedIn()">
-      <form ng-submit="logout()">
-        <div class="card">
-          <div class="item item-text-wrap">
-            You are currently signed in as <span class="item-strong-true">{{getDisplayName()}}</span>.
-          </div>
+      <div class="card">
+        <div class="item item-text-wrap">
+          You are currently signed in as <span class="item-strong-true">{{getDisplayName()}}</span>.
         </div>
-        <label class="item">
-          <button class="button button-block button-assertive" type="submit">Sign out and delete all data</button>
-        </label>
-      </form>
+      </div>
+      <label class="item">
+        <button class="button button-block button-assertive" ng-click="logout()">Sign out and delete all data</button>
+      </label>
     </div>
   </ion-content>
 </ion-view>

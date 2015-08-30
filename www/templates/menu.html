@@ -1,5 +1,5 @@
 <ion-side-menus enable-menu-with-back-views="false">
-  <ion-side-menu-content>
+  <ion-side-menu-content drag-content="false">
     <ion-nav-bar class="bar-stable">
       <ion-nav-back-button>
       </ion-nav-back-button>
@@ -30,10 +30,10 @@
         <ion-item menu-close href="#/app/share">
           Share app
         </ion-item>
-        <ion-item menu-close href="http://rayyan.qcri.org/" target="_system">
+        <ion-item menu-close href="#" ng-click="menuClicked('http://rayyan.qcri.org/')">
           Visit Rayyan
         </ion-item>
-        <ion-item menu-close href="http://support.rayyan.qcri.org/" target="_system">
+        <ion-item menu-close href="#" ng-click="menuClicked('http://support.rayyan.qcri.org/')">
           Contact us
         </ion-item>
       </ion-list>

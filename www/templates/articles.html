@@ -3,7 +3,7 @@
     <button class="button button-icon icon ion-funnel"></button>
     <button ng-if="showBlind" class="button button-icon icon {{blindIcon()}}" ng-click="blindClicked()"></button>
   </ion-nav-buttons>
-  <ion-content delegate-handle="articlesContent">
+  <ion-content delegate-handle="articlesContent" class="has-footer">
 
     <div class="list card" ng-repeat="article in articles">
       <div class="item item-body">
@@ -37,10 +37,12 @@
       </div>
 
       <div class="row padding">
-        <button class="col button button-large button-balanced icon-left ion-thumbsup">
+        <button class="col button button-large button-balanced icon-left ion-thumbsup"
+        ng-click="includedClicked(article, 1)">
           Include
         </button>
-        <button class="col col-offset-10 button button-large button-assertive icon-left ion-thumbsdown">
+        <button class="col col-offset-10 button button-large button-assertive icon-left ion-thumbsdown"
+        ng-click="includedClicked(article, -1)">
           Exclude
         </button>
       </div>
@@ -63,10 +65,19 @@
 
     <ion-infinite-scroll ng-if="!noMoreArticlesAvailable" on-infinite="loadMore()" distance="10%"></ion-infinite-scroll>
   
-    <div ng-if="noMoreArticlesAvailable" class="item item-body">
+    <div ng-if="noMoreArticlesAvailable && !errorLoadingMore && !download_pending" class="item item-body">
       Congratulations, no more articles to screen. If there is no filter
       then you are done, Yay! If there is filter, change filter to get more.
     </div>
+
+    <div ng-if="errorLoadingMore" class="item item-body">
+      Error loading more articles
+    </div>
+
+    <div ng-if="download_pending" class="item item-body">
+      Review download is pending, please wait until it finishes then come back again
+    </div>
+
   </ion-content>
 
 </ion-view>

@@ -21,7 +21,8 @@
     "cordova-plugin-splashscreen",
     "com.ionic.keyboard",
     "cordova-sqlite-storage",
-    "cordova-plugin-inappbrowser"
+    "cordova-plugin-inappbrowser",
+    "cordova-plugin-network-information"
   ],
   "cordovaPlatforms": [
     "ios"

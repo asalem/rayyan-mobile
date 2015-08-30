@@ -60,17 +60,29 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     return deferred.promise;
   }
 
+  var injectExcludeInPlan = function(plan) {
+    // if any key in the plan is an exclusion reason, then auto-exclude article
+    if (_.some(plan, function(value, key){return key != 'included' && value > 0 && !M.labelPredicate(key)}))
+      return _.defaults(_.clone(plan), {included: -1});
+    else
+      return plan;
+  }
+
   return {
     login: function() {
       // testing on browser, cheat accessToken
-      rayyanRemoteService.setAccessToken("c10646fe6391ae5534bf5381a6ba06828b20c34c6c71dd3cd23d586a1a01bbd0");
+      rayyanRemoteService.setAccessToken(
+        "ab68db31414734cac6e4d9c10e804b5a76538a58fbb87a6955a4800632a63970",   // access_token
+        "021a467e5f88fb01b2814e9289d26dc966ebc041442d0a2442d10e77b0838c96");  // refresh_token
+      rayyanRemoteService.setBaseURI(false)
       return rayyanRemoteService.getUserInfo();
     },
     logout: function() {
       $localStorage.$reset();
-      getReady().then(function(){
+      return getReady().then(function(){
         // cascade destroying all reviews/articles/customizations
-        M.setReviews([], $q)
+        return M.setReviews([], $q)
+        // TODO erase journal?
       })
     },
     loggedIn: function() {
@@ -96,13 +108,42 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     },
     getArticles: function(review, offset, limit) {
       return getReady().then(function(){
-        console.log("in local.service getArticles", review.title, offset, limit)
         return M.getArticles(review, offset, limit, $q)
       })
     },
     setArticles: function(review, articles, offset) {
       return getReady().then(function(){
         return M.setArticles(review, articles, offset, $q)
+      })
+    },
+    applyCustomization: function(review, article, plan) {
+      return getReady().then(function(){
+        return M.setCustomizations(review, article, injectExcludeInPlan(plan), $q)
+      })
+    },
+    addActionToJournal: function(review, article, plan) {
+      return getReady().then(function(){
+        return M.appendJournalPlan(review, article, injectExcludeInPlan(plan), $q);
+      })
+    },
+    getJournalPendingActionsCount: function() {
+      return getReady().then(function(){
+        return M.getJournalPendingActionsCount($q)
+      })
+    },
+    getJournalPendingActionsBatch: function(batchSize) {
+      return getReady().then(function(){
+        return M.getJournalPendingActionsBatch(batchSize, $q)
+      })
+    },
+    removeJournalActions: function(ids) {
+      return getReady().then(function(){
+        return M.removeJournalActions(ids, $q)
+      })
+    },
+    removeJournalAction: function(journalAction) {
+      return getReady().then(function(){
+        return M.removeJournalAction(journalAction, $q)
       })
     }
   }

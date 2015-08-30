@@ -48,6 +48,7 @@ M.setArticles = function(review, articlesAndCustomizations, offset, $q) {
     })
     review.articles.add(a);
   })
+  review.downloaded_articles = (review.downloaded_articles || 0) + articles.length;
 
   persistence.flush(function(){
     M.getArticles(review, offset, articles.length, $q).then(function(articles){

@@ -1,14 +1,43 @@
 <ion-view view-title="Reviews">
-  <ion-content>
-    <ion-refresher on-refresh="doRefresh()">                   
+  <ion-content class="has-footer">
+    <ion-refresher on-refresh="doRefresh()">
     </ion-refresher>
     <ion-list>
-      <ion-item href="#" ng-click="reviewClicked({{review.rayyan_id}})"
-      class="item item-icon-right" ng-repeat="review in reviews">
-        <span class="item-italic-{{!review.owner}}">
-          {{review.title}} ({{review.total_articles}} articles)
-        </span>
-        <i class="icon ion-chevron-right icon-accessory"></i>
+      <ion-item href="#" ng-click="reviewClicked(review)"
+      class="item item-icon-right item-thumbnail-left" ng-repeat="review in reviews">
+        <canvas ng-if="review.total_articles > 0"
+          class="decisions-chart chart chart-doughnut"
+          data="[review.included, review.excluded, getReviewUndecidedCount(review)]"
+          labels="['Included', 'Excluded', 'Undecided']"
+          colours="['#008000', '#FF0000', '#D3D3D3']"
+          options="{animateRotate:false, animationSteps:1, percentageInnerCutout:70, segmentShowStroke:false, onAnimationComplete: drawChartText}">
+        </canvas>
+        <h2 class="item-italic-{{!review.owner}}">{{review.title}}</h2>
+        <div>
+          {{review.total_articles}} articles
+        </div>
+
+        <progress
+        ng-if="review.total_articles > 0 && review.downloaded_articles > 0 && review.downloaded_articles < review.total_articles"
+          value="{{review.downloaded_articles}}"
+          min="0" max="{{review.total_articles}}"
+          style="transition: width 0.1s;">
+        </progress>
+
+        <i ng-if="!review.download_pending" class="icon {{reviewIcon(review)}}"
+        ng-click="iconClicked($event, review)">
+        </i>
+
+        <i ng-if="review.download_pending" class="icon" ng-click="iconClicked($event, review)">
+          <ion-spinner class="review-download-pending"></ion-spinner>
+        </i>
+
+
+        <ion-option-button class="button-assertive"
+                       ng-click="clearReviewArticles(review)">
+          Clear
+        </ion-option-button>
+
       </ion-item>
     </ion-list>
   </ion-content>

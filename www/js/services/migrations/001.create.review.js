@@ -4,6 +4,10 @@ persistence.defineMigration(1, {
       t.integer('rayyan_id');
       t.text('title');
       t.integer('total_articles');
+      t.integer('downloaded_articles');
+      t.integer('included');
+      t.integer('excluded');
+      t.text('articles_etag');
       t.boolean('blind');
       t.boolean('owner');
       t.integer('users_count');

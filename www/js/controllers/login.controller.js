@@ -1,8 +1,25 @@
 angular.module('login.controller', ['rayyan.services'])
 
-.controller('LoginController', function($scope, rayyanAPIService) {
+.controller('LoginController', function($rootScope, $scope, rayyanAPIService, $ionicPlatform) {
   $scope.loggedIn = rayyanAPIService.loggedIn;
   $scope.getDisplayName = rayyanAPIService.getDisplayName;
-  $scope.login = rayyanAPIService.login
-  $scope.logout = rayyanAPIService.logout
+  $scope.login = function() {
+    rayyanAPIService.login()
+      .then(function(){
+        rayyanAPIService.getReviews()
+          .then(function(reviews){
+            $rootScope.reviews = reviews
+          })
+      })
+  }
+  $scope.logout = function() {
+    $rootScope.reviews = []
+    rayyanAPIService.logout()
+  }
+
+  $scope.menuClicked = function(url) {
+    $ionicPlatform.ready(function(){
+      (window.cordova ? cordova.InAppBrowser : window).open(url, '_system');
+    })
+  }
 });

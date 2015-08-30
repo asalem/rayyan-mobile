@@ -1,4 +1,3 @@
-/* Empty. Add your own CSS if you like */
 .item-strong-true {
   font-weight: bold;
 }
@@ -55,4 +54,59 @@
   line-height: 22px;
   color: black;
   font-weight: bold;
+}
+
+.review-downloaded-all {
+  color: green;
+}
+
+.review-download-error {
+  color: red;
+}
+
+ion-spinner.review-download-pending svg{
+}
+
+.decisions-chart {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  max-width: 70px;
+  max-height: 70px;
+  width: 100%;
+  height: 100%;
+}
+
+.has-footer {
+  bottom: 24px;
+}
+
+.connection-footer {
+  height: 24px;
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+  line-height: 15px;
+}
+
+.connection-footer.connection-online {
+  background-color: green;
+  color: white;
+}
+
+.connection-footer.connection-offline {
+  background-color: red;
+  color: white;
+}
+
+.pending-actions-count {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+ion-spinner.journal-processing-pending svg{
+  width: 16px;
+  height: 16px;
+  stroke: white;
 }
