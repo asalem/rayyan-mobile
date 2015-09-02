@@ -1,6 +1,8 @@
 <ion-view view-title="{{review.title}}">
   <ion-nav-buttons side="secondary">
-    <button class="button button-icon icon ion-funnel"></button>
+    <button class="button button-icon icon ion-funnel" ng-click="openFiltersView()">
+      <span class="badge badge-assertive facet-badge" ng-hide="facetCount==0">{{facetCount}}</span>
+    </button>
     <button ng-if="showBlind" class="button button-icon icon {{blindIcon()}}" ng-click="blindClicked()"></button>
   </ion-nav-buttons>
   <ion-content delegate-handle="articlesContent" class="has-footer">

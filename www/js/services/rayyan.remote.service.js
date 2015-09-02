@@ -115,10 +115,10 @@ angular.module('rayyan.remote.service', [])
       baseURI = "http://rayyan.qcridemos.org";
     else {
       // baseURI = "http://127.0.0.1:5000"
-      // baseURI = "http://10.153.236.129:5000"
+      baseURI = "http://10.153.236.129:5000"
       // baseURI = "http://10.5.3.238:5000"
       // baseURI = "http://rayyan.qcri.org"
-      baseURI = "http://192.168.100.6:5000"
+      // baseURI = "http://192.168.100.6:5000"
     }
     $localStorage.baseURI = baseURI;
   }
@@ -197,6 +197,50 @@ angular.module('rayyan.remote.service', [])
       })
   }
 
+  var getFacets = function(reviewId, facetTypes) {
+    var promises = {}
+    var paramsMap = {
+      labels: 'user_labels',
+      reasons: 'exclusion_labels',
+      topics: 'keyphrases',
+      highlights: 'highlights'
+    }
+    var responseFacetMap = {
+      all_labels: 'labels',
+      keyphrases: 'topics',
+      highlights: 'highlights'
+    }
+
+    // send inclusion counts request if found in facetTypes
+    var indexOfInclusions = _.indexOf(facetTypes, 'inclusions')
+    if (indexOfInclusions > -1) {
+      facetTypes = _.without(facetTypes, 'inclusions')
+      promises.inclusions = requestReviewEndpoint(
+        'GET', '/api/v1/reviews/:id/inclusion_counts', reviewId, {force_blind: 1})
+    }
+
+    // send all other facetTypes in a single facets request
+    if (facetTypes.length > 0) {
+      var params = _.reduce(facetTypes, function(hash, facetType){
+        hash[paramsMap[facetType]] = 1
+        return hash
+      }, {})
+
+      promises.remote = requestReviewEndpoint('GET', '/api/v1/reviews/:id/facets', reviewId, {facets: params})
+    }
+
+    return $q.all(promises)
+      .then(function(promises){
+        var merged = {}
+        if (promises.inclusions)
+          merged.inclusions = promises.inclusions
+        _.each(promises.remote, function(facet, facetType){
+          merged[responseFacetMap[facetType]] = facet
+        })
+        return merged
+      })
+  }
+
   var getLabels = function(reviewId) {
     return requestReviewEndpoint('GET', '/api/v1/reviews/:id/labels', reviewId);
   }
@@ -227,6 +271,7 @@ angular.module('rayyan.remote.service', [])
     logout: revoke,
     getUserInfo: getUserInfo,
     getReviews: getReviews,
+    getFacets: getFacets,
     getLabels: getLabels,
     getArticles: getArticles,
     toggleBlind: toggleBlind,

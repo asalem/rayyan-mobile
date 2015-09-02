@@ -2,14 +2,21 @@
   <ion-content class="has-footer">
     <ion-refresher on-refresh="doRefresh()">
     </ion-refresher>
-    <ion-list>
+    
+    <ion-list ng-repeat="reviewGroup in reviewGroups">
+      <ion-item class="item-divider">
+        {{reviewGroup.name}}
+      </ion-item>
+      <ion-item ng-if="reviewGroup.reviews.length == 0" class="item item-body">
+        {{reviewGroup.emptyMessage}}
+      </ion-item>
       <ion-item href="#" ng-click="reviewClicked(review)"
-      class="item item-icon-right item-thumbnail-left" ng-repeat="review in reviews">
-        <canvas ng-if="review.total_articles > 0"
+      class="item item-icon-right item-thumbnail-left" ng-repeat="review in reviewGroup.reviews">
+        <canvas ng-if="shouldDrawChart(review)"
           class="decisions-chart chart chart-doughnut"
-          data="[review.included, review.excluded, getReviewUndecidedCount(review)]"
+          data="[review.inclusions[1].count, review.inclusions[2].count, review.inclusions[0].count]"
           labels="['Included', 'Excluded', 'Undecided']"
-          colours="['#008000', '#FF0000', '#D3D3D3']"
+          colours="chartColors"
           options="{animateRotate:false, animationSteps:1, percentageInnerCutout:70, segmentShowStroke:false, onAnimationComplete: drawChartText}">
         </canvas>
         <h2 class="item-italic-{{!review.owner}}">{{review.title}}</h2>

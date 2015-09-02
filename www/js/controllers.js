@@ -1,4 +1,4 @@
-angular.module('rayyan.controllers', ['login.controller', 'reviews.controller', 'articles.controller', 'labels.controller', 'footer.controller'])
+angular.module('rayyan.controllers', ['login.controller', 'reviews.controller', 'articles.controller', 'labels.controller', 'footer.controller', 'facets.controller'])
 
 .controller('AppController', function() {
 

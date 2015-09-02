@@ -1,6 +1,6 @@
-angular.module('articles.controller', ['rayyan.services'])
+angular.module('articles.controller', ['rayyan.services', 'rayyan.directives'])
 
-.controller('ArticleController', function($rootScope, $scope, $stateParams, rayyanAPIService, $ionicSideMenuDelegate) {
+.controller('ArticleController', function($rootScope, $scope, $stateParams, rayyanAPIService, $ionicSideMenuDelegate, $ionicModal) {
   var BATCH_SIZE = 10;
   var STANDARD_EXCLUSION_REASONS = [
     'wrong outcome',
@@ -15,15 +15,45 @@ angular.module('articles.controller', ['rayyan.services'])
 
   var reviewId = $stateParams.reviewId
   var review = $rootScope.review
-  if (!review)
+  if (!review) {
     review = rayyanAPIService.getReview(reviewId)
+    $rootScope.review = review
+  }
 
   var originalArticleLabels, labelPrefix;
   var articlesOffset = 0;
   var articleToLabel;
 
-  $scope.review = review
-  
+  // Begin modal filters view functions
+  $ionicModal.fromTemplateUrl('templates/facets.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.filtersView = modal;
+  });
+  $scope.openFiltersView = function() {
+    $scope.filtersView.show();
+  };
+  $rootScope.applyFacets = function(facetCount) {
+    console.log("applying facets", facetCount)
+    $scope.facetCount = facetCount
+    $scope.filtersView.hide();
+  };
+  //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    $scope.filtersView.remove();
+  });
+  // Execute action on hide modal
+  $scope.$on('modal.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove modal
+  $scope.$on('modal.removed', function() {
+    // Execute action
+  });
+  $scope.facetCount = 0
+  // End modal filters view functions
+
   var processLabels = function(labels) {
     var partitions = _.partition(labels, function(label){
       return M.labelPredicate(label)

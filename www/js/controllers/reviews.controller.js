@@ -2,14 +2,54 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
 
 .controller('ReviewsController', function($rootScope, $scope, $location, rayyanAPIService, $ionicListDelegate) {
 
+  var reviewFullyDownloaded = function(review) {
+    return review.total_articles > 0 && review.downloaded_articles >= review.total_articles
+  }
+
+  var getReviewFacets = function(review) {
+    rayyanAPIService.getFacets(review, ["inclusions", "labels", "topics", "highlights"])
+  }
+
+  var setReviews = function(reviews) {
+    $rootScope.reviews = reviews
+    var groups = _.partition(reviews, reviewFullyDownloaded)
+    $rootScope.reviewGroups = [
+      {
+        reviews: groups[0],
+        name: "Offline",
+        emptyMessage: "Reviews that you download will appear here"
+      },
+      {
+        reviews: groups[1],
+        name: "Online",
+        emptyMessage: "You have no reviews yet, create one from Rayyan website"
+      }
+    ]
+  }
+
   $scope.doRefresh = function() {
     rayyanAPIService.getReviews()
       .then(function(reviews){
         // remote reviews
-        $rootScope.reviews = reviews
-      }, null, function(reviews){
+        setReviews(reviews)
+        // we are online, chance to get all facets (for downloaded reviews) or just inclusions for others
+        _.each(reviews, function(review){
+          if (reviewFullyDownloaded(review))
+            getReviewFacets(review)
+          else
+            rayyanAPIService.getFacets(review, ["inclusions"])
+        })
+      },
+      function(error) {
+        // offline, get inclusions for all reviews, should get from local db regardless of the dirty flag
+        // TODO MAKE SURE IT WORKS WITH NEW GROUPING
+        _.each($rootScope.reviews, function(review){
+          rayyanAPIService.getFacets(review, ["inclusions"])
+        })
+      },
+      function(reviews) {
         // local reviews
-        $rootScope.reviews = reviews
+        setReviews(reviews)
       })
       .finally(function(){
         //Stop the ion-refresher from spinning
@@ -17,8 +57,17 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
       })
   }
 
-  $scope.getReviewUndecidedCount = function(review) {
-    return Math.max(0, review.total_articles - review.included - review.excluded);
+  $scope.chartColors = ['#008000', '#FF0000', '#D3D3D3'];
+
+  $scope.shouldDrawChart = function(review) {
+    return review.total_articles > 0 
+      && review.inclusions
+      && review.inclusions[0]
+      && review.inclusions[1]
+      && review.inclusions[2]
+      && review.inclusions[0].count 
+        + review.inclusions[1].count 
+        + review.inclusions[2].count > 0
   }
 
   $scope.drawChartText = function() {
@@ -89,8 +138,14 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     }
     else {
       console.log("start download")
+
+      getReviewFacets(review)
+
       rayyanAPIService.downloadReviewArticles(review)
-        .catch(function(error){
+        .then(function(){
+          // to move downloaded review to the offline group
+          setReviews($rootScope.reviews)
+        }, function(error){
           switch(error) {
             case "articles_etag_changed":
               alert("Review is being updated on the server, please wait until it is done then refresh this page and try again")
@@ -106,7 +161,9 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
   }
 
   $scope.clearReviewArticles = function(review) {
-    rayyanAPIService.clearReviewArticles(review);
+    rayyanAPIService.clearReviewArticles(review)
+    // to move cleared review to the online group
+    setReviews($rootScope.reviews)
     $ionicListDelegate.closeOptionButtons();
   }
 

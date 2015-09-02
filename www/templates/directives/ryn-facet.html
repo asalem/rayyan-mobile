@@ -1,0 +1,35 @@
+<div class="list card facet-card">
+
+  <div ng-if="!facet.search">
+    <div class="item item-divider item-button-right" ng-click="facetHidden=!facetHidden">
+      {{facet.title}}
+      <button class="facet-clear-button button button-clear"
+      ng-hide="shouldHideClearButton()" ng-click="clearItems($event)">
+        <div>Clear</div>
+      </button>
+    </div>
+
+    <ion-checkbox href="#" ng-hide="facetHidden" class="item-button-right"
+    ng-repeat="item in facet.items" ng-model="item.selected" ng-change="checkboxChanged(item)">
+      {{item.display}}
+      <button class="button button-clear">
+        <div>{{item.count}}</div>
+      </button>
+    </ion-checkbox>
+  </div>
+
+  <div ng-if="facet.search">
+    <div class="item-input-wrapper facet-search-wrapper"
+      <label>
+        <span class="facet-search-title">{{facet.title}}</span>
+        <i class="icon ion-ios-search placeholder-icon facet-search-icon"></i>
+        <input type="search" placeholder="Search" class="facet-search-box"
+        ng-model="facet.criteria">
+      </label>
+      <button class="button button-clear facet-search-clear-button" ng-click="facet.criteria=''">
+        <span ng-hide="!facet.criteria">Clear</span>
+      </button>
+    </div>
+  </div>
+
+</div>

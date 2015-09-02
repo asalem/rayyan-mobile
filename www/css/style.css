@@ -45,7 +45,7 @@
   background-color: red;  
 }
 
-.search-box {
+.labels-search-box {
   background-color: inherit;
 }
 
@@ -109,4 +109,52 @@ ion-spinner.journal-processing-pending svg{
   width: 16px;
   height: 16px;
   stroke: white;
+}
+
+.item-input-wrapper.facet-search-wrapper {
+  padding-right: 0;
+}
+
+.facet-search-title {
+  margin-right: 8px;
+}
+
+.facet-search-box {
+  background-color: white;
+  width: 100%;
+}
+
+.facet-search-icon {
+  background-color: white;
+  line-height: 37px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.facet-search-clear-button {
+  min-width: inherit;
+}
+
+.list:last-child.card.facet-card{
+  margin-bottom: 20px;
+}
+
+.item-button-right > .button.facet-clear-button {
+  top: 0px;
+  right: 0px;
+}
+
+.bar .buttons-right span.facet-badge {
+  margin-left: 10px;
+}
+
+.button .badge.facet-badge {
+  top: -35px;
+  right: -12px;
+}
+
+.badge.facet-badge {
+  padding: 3px;
+  font-size: 10px;
+  line-height: 14px;
 }

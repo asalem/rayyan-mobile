@@ -8,6 +8,8 @@ persistence.defineMigration(1, {
       t.integer('included');
       t.integer('excluded');
       t.text('articles_etag');
+      t.text('labels_etag');
+      t.text('inclusions_etag');
       t.boolean('blind');
       t.boolean('owner');
       t.integer('users_count');

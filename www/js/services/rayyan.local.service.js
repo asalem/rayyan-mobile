@@ -116,6 +116,16 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
         return M.setArticles(review, articles, offset, $q)
       })
     },
+    getFacet: function(review, facetType) {
+      return getReady().then(function(){
+        return M.getFacet(review, facetType, $q)
+      })
+    },
+    setFacet: function(review, facetType, facets) {
+      return getReady().then(function(){
+        return M.setFacet(review, facetType, facets, $q)
+      })
+    },
     applyCustomization: function(review, article, plan) {
       return getReady().then(function(){
         return M.setCustomizations(review, article, injectExcludeInPlan(plan), $q)

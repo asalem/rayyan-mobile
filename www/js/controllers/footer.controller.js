@@ -70,7 +70,8 @@ angular.module('footer.controller', ['rayyan.services'])
 
   $rootScope.pendingActionsCount = 0;
   $scope.footerText = "Checking connection...";
-  setConnectionStatus('offline');
+  // TODO: connection status for !window.cordova
+  // setConnectionStatus('offline');
 
   rayyanAPIService.getJournalPendingActionsCount()
     .then(function(count){

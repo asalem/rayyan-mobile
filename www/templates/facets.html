@@ -1,0 +1,24 @@
+<ion-modal-view ng-controller="FacetsController">
+  <ion-header-bar class="bar bar-header bar-positive">
+    <h1 class="title">Filters</h1>
+    <div class="button button-clear" ng-click="applyFacets()">
+      <span class="icon ion-close"></span>
+    </div>
+  </ion-header-bar>
+  <ion-content has-header="true" padding="true" delegate-handle="facetsContent">
+
+    <ryn-facet facet="searchFacet"></ryn-facet>
+    <ryn-facet facet="topicsFacet"></ryn-facet>
+    <ryn-facet facet="highlightsFacet"></ryn-facet>
+    <ryn-facet facet="inclusionsFacet"></ryn-facet>
+    <ryn-facet facet="labelsFacet"></ryn-facet>
+    <ryn-facet facet="reasonsFacet"></ryn-facet>
+    <ryn-facet facet="titleSearchFacet"></ryn-facet>
+    <ryn-facet facet="abstractSearchFacet"></ryn-facet>
+    <ryn-facet facet="authorSearchFacet"></ryn-facet>
+
+    <div class="padding">
+      <button class="button button-block button-calm" ng-click="applyFacets()">Apply</button>
+    </div>
+  </ion-content>
+</ion-modal-view>
