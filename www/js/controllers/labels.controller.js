@@ -20,4 +20,8 @@ angular.module('labels.controller', [])
       return label.match(searchCriteriaRegex)
   }
 
+  $scope.newLabelChanged = function(label, value, labels) {
+    // append the new label to the volatile list so that it is listed later as being existant
+    if (value) labels.push(label)
+  }
 });

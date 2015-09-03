@@ -14,7 +14,7 @@
       class="item item-icon-right item-thumbnail-left" ng-repeat="review in reviewGroup.reviews">
         <canvas ng-if="shouldDrawChart(review)"
           class="decisions-chart chart chart-doughnut"
-          data="[review.inclusions[1].count, review.inclusions[2].count, review.inclusions[0].count]"
+          data="[review.filters.inclusions[1].count, review.filters.inclusions[2].count, review.filters.inclusions[0].count]"
           labels="['Included', 'Excluded', 'Undecided']"
           colours="chartColors"
           options="{animateRotate:false, animationSteps:1, percentageInnerCutout:70, segmentShowStroke:false, onAnimationComplete: drawChartText}">

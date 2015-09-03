@@ -57,7 +57,8 @@
           ng-repeat="label in labels | filter: filterAndDetectExactMatch"
           ng-model="labelModels[label]">{{label}}</ion-checkbox>
         <ion-checkbox ng-if="!exactMatch && searchCriteria!=''" href="#"
-          ng-model="labelModels[searchCriteria]">{{searchCriteria}} (new)</ion-checkbox>
+          ng-model="labelModels[searchCriteria]"
+          ng-change="newLabelChanged(searchCriteria, labelModels[searchCriteria], labels)">{{searchCriteria}} (new)</ion-checkbox>
       </ion-list>
     </ion-content>
   </ion-side-menu>

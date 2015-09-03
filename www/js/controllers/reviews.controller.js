@@ -2,27 +2,26 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
 
 .controller('ReviewsController', function($rootScope, $scope, $location, rayyanAPIService, $ionicListDelegate) {
 
-  var reviewFullyDownloaded = function(review) {
+  $rootScope.reviewFullyDownloaded = function(review) {
     return review.total_articles > 0 && review.downloaded_articles >= review.total_articles
-  }
-
-  var getReviewFacets = function(review) {
-    rayyanAPIService.getFacets(review, ["inclusions", "labels", "topics", "highlights"])
   }
 
   var setReviews = function(reviews) {
     $rootScope.reviews = reviews
-    var groups = _.partition(reviews, reviewFullyDownloaded)
+    var groups = _.partition(reviews, $rootScope.reviewFullyDownloaded)
     $rootScope.reviewGroups = [
       {
         reviews: groups[0],
         name: "Offline",
-        emptyMessage: "Reviews that you download will appear here"
+        emptyMessage: "Reviews that you download from below will appear here. "
+          + "Once downloaded, you can do your screening as usual, even if your are offline. "
+          + "The next time you are online, it will sync automatically to Rayyan servers. "
+          + "To clear a downloaded review, just swipe it to the left."
       },
       {
         reviews: groups[1],
         name: "Online",
-        emptyMessage: "You have no reviews yet, create one from Rayyan website"
+        emptyMessage: "You have no reviews yet, create one from Rayyan website."
       }
     ]
   }
@@ -30,30 +29,27 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
   $scope.doRefresh = function() {
     rayyanAPIService.getReviews()
       .then(function(reviews){
-        // remote reviews
+        // online: remote reviews
         setReviews(reviews)
-        // we are online, chance to get all facets (for downloaded reviews) or just inclusions for others
-        _.each(reviews, function(review){
-          if (reviewFullyDownloaded(review))
-            getReviewFacets(review)
-          else
-            rayyanAPIService.getFacets(review, ["inclusions"])
-        })
       },
       function(error) {
-        // offline, get inclusions for all reviews, should get from local db regardless of the dirty flag
-        // TODO MAKE SURE IT WORKS WITH NEW GROUPING
-        _.each($rootScope.reviews, function(review){
-          rayyanAPIService.getFacets(review, ["inclusions"])
-        })
+        // offline: fallback to local reviews
       },
       function(reviews) {
-        // local reviews
+        // notified with local reviews, will be needed if offline
         setReviews(reviews)
       })
       .finally(function(){
         //Stop the ion-refresher from spinning
         $scope.$broadcast('scroll.refreshComplete');
+        // get all facets (for downloaded reviews) or just inclusions for others
+        // if online, they will go through remote server, otherwise from local db
+        _.each($rootScope.reviewGroups[0].reviews, function(review){
+          rayyanAPIService.getFacets(review)
+        })
+        _.each($rootScope.reviewGroups[1].reviews, function(review){
+          rayyanAPIService.getFacets(review, ["inclusions"])
+        })
       })
   }
 
@@ -61,13 +57,14 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
 
   $scope.shouldDrawChart = function(review) {
     return review.total_articles > 0 
-      && review.inclusions
-      && review.inclusions[0]
-      && review.inclusions[1]
-      && review.inclusions[2]
-      && review.inclusions[0].count 
-        + review.inclusions[1].count 
-        + review.inclusions[2].count > 0
+      && review.filters
+      && review.filters.inclusions
+      && review.filters.inclusions[0]
+      && review.filters.inclusions[1]
+      && review.filters.inclusions[2]
+      && review.filters.inclusions[0].count 
+        + review.filters.inclusions[1].count 
+        + review.filters.inclusions[2].count > 0
   }
 
   $scope.drawChartText = function() {
@@ -139,7 +136,7 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     else {
       console.log("start download")
 
-      getReviewFacets(review)
+      rayyanAPIService.getFacets(review)
 
       rayyanAPIService.downloadReviewArticles(review)
         .then(function(){

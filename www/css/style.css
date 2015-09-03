@@ -158,3 +158,32 @@ ion-spinner.journal-processing-pending svg{
   font-size: 10px;
   line-height: 14px;
 }
+
+.highlight-category-1 {
+  background-color: lightgreen;
+  color: black;
+  padding: 0 3px 0 3px;
+}
+
+.highlight-category-2 {
+  background-color: red;
+  color: white;
+  padding: 0 3px 0 3px;
+}
+
+.highlight-category-search {
+  background-color: yellow;
+  color: black;
+  padding: 0 3px 0 3px;
+}
+
+.highlight-hidden {
+  background-color: transparent !important;
+  color: black !important;
+  padding: 0 !important;
+}
+
+.abstract {
+  text-align: justify; 
+  text-justify: distribute;
+}

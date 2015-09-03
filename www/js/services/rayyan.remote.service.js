@@ -70,6 +70,7 @@ angular.module('rayyan.remote.service', [])
 
     $http(req).then(function(response) {
       deferred.resolve(response.data)
+      // TODO: count received bytes here (take care of gzipping, read Content-Length)
     }, function(response) {
       console.log("error in http with status", response.status)
       if (!noRefreshToken && response.status == 401) {
@@ -115,10 +116,10 @@ angular.module('rayyan.remote.service', [])
       baseURI = "http://rayyan.qcridemos.org";
     else {
       // baseURI = "http://127.0.0.1:5000"
-      baseURI = "http://10.153.236.129:5000"
+      // baseURI = "http://10.153.236.129:5000"
       // baseURI = "http://10.5.3.238:5000"
       // baseURI = "http://rayyan.qcri.org"
-      // baseURI = "http://192.168.100.6:5000"
+      baseURI = "http://192.168.100.6:5000"
     }
     $localStorage.baseURI = baseURI;
   }
@@ -197,23 +198,56 @@ angular.module('rayyan.remote.service', [])
       })
   }
 
+  var transformRemoteFacets = function(facet, facetType) {
+    var hash = {}
+    var inclusionsMap = {included: 1, excluded: -1, undecided: 0}
+    switch(facetType) {
+      case 'inclusions':
+        hash.inclusions = _.map(facet, function(count, key){
+          return [
+            M.capitalize(key),
+            inclusionsMap[key],
+            count
+          ]
+        })
+      break;
+      case 'all_labels':
+        var partitions = _.partition(facet.collection, function(facetRow){
+          return M.labelPredicate(facetRow[1])
+        })
+        hash.labels = partitions[0]
+        hash.reasons = _.map(partitions[1], function(facetRow){
+          var copy = _.clone(facetRow)
+          copy[0] = M.cleanExclusionReason(copy[0])
+          return copy
+        })
+      break;
+      case 'keyphrases':
+        hash.topics = facet.collection
+      break;
+      case 'highlights':
+        _.each(facet, function(collection, key){
+          hash['highlights_' + key] = collection
+        })
+      break;
+      default:
+        hash[facetType] = facet.collection
+    }
+    return hash
+  }
+
   var getFacets = function(reviewId, facetTypes) {
     var promises = {}
     var paramsMap = {
       labels: 'user_labels',
       reasons: 'exclusion_labels',
       topics: 'keyphrases',
-      highlights: 'highlights'
-    }
-    var responseFacetMap = {
-      all_labels: 'labels',
-      keyphrases: 'topics',
-      highlights: 'highlights'
+      highlights_1: 'highlights',
+      highlights_2: 'highlights'
     }
 
     // send inclusion counts request if found in facetTypes
-    var indexOfInclusions = _.indexOf(facetTypes, 'inclusions')
-    if (indexOfInclusions > -1) {
+    if (_.contains(facetTypes, 'inclusions')) {
       facetTypes = _.without(facetTypes, 'inclusions')
       promises.inclusions = requestReviewEndpoint(
         'GET', '/api/v1/reviews/:id/inclusion_counts', reviewId, {force_blind: 1})
@@ -231,13 +265,12 @@ angular.module('rayyan.remote.service', [])
 
     return $q.all(promises)
       .then(function(promises){
-        var merged = {}
-        if (promises.inclusions)
-          merged.inclusions = promises.inclusions
-        _.each(promises.remote, function(facet, facetType){
-          merged[responseFacetMap[facetType]] = facet
-        })
-        return merged
+        // transform returned facets from server compressed objects to client releaxed ones
+        return _.reduce(promises.remote, function(hash, facet, facetType){
+          return _.extend(hash, transformRemoteFacets(facet, facetType))
+        }, promises.inclusions 
+          ? _.extend({}, transformRemoteFacets(promises.inclusions, 'inclusions'))
+          : {})
       })
   }
 

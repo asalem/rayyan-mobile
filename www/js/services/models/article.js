@@ -8,21 +8,78 @@ M.Article = persistence.define('Article', {
 
 M.Review.hasMany('articles', M.Article, 'review')
 
-M.getArticles = function(review, offset, limit, $q) {
-  console.log("in M.getArticles", review, offset, limit)
+M.getArticles = function(review, offset, limit, facetValues, $q) {
+  console.log("in M.getArticles", review, offset, limit, facetValues)
   var deferred = $q.defer();
 
-  review.articles
-    .skip(offset)
-    .limit(limit)
-    .order("rayyan_id", true)
-    .list(null, function(articles){
+  // TODO move 2 functions out when converting to angular module
+  var getFilteredArticlesIds = function(review, offset, limit, facetValues) {
+    // manually construct query and return article ids
+    var deferred = $q.defer();
+
+    persistence.transaction(function(tx){
+      var sql = "select id from Article "
+        + "where review = '" + review.id + "' "
+
+      // TODO sanitize search criteria or use a library to construct the query!
+      // TODO persist topics, display them, and search in them
+      // TODO do the rest of the where clauses
+      if (facetValues.search) {
+        sql += "and (article.title like '%"+facetValues.search+"%' "
+          + "or article.full_abstract like '%"+facetValues.search+"%' "
+          + "or article.authors like '%"+facetValues.search+"%') "
+      }
+      if (facetValues.titleSearch) {
+        sql += "and (article.title like '%"+facetValues.titleSearch+"%') "
+      }
+      if (facetValues.authorSearch) {
+        sql += "and (article.authors like '%"+facetValues.authorSearch+"%') "
+      }
+      if (facetValues.abstractSearch) {
+        sql += "and (article.full_abstract like '%"+facetValues.abstractSearch+"%') "
+      }
+
+      sql += "order by rayyan_id asc "
+        + "limit " + limit + " offset " + offset + ";"
+      tx.executeSql(sql, [], function(results) {
+        var ids = _.pluck(results, 'id')
+        console.log(results, ids)
+        deferred.resolve(ids)
+      });
+    })
+
+    return deferred.promise;
+  }
+
+  var selectArticles = function(query) {
+    query.list(null, function(articles){
       console.log("loaded articles from db", articles)
       M.assignCustomizations(review, articles, $q)
         .then(function(){
           deferred.resolve(articles);
         })
     })
+  }
+
+  var query
+
+  if (!_.isEmpty(facetValues)) {
+    query = M.Article.all().order("rayyan_id", true)
+    getFilteredArticlesIds(review, offset, limit, facetValues)
+      .then(function(articleIds){
+        console.log("should continue query by the ids", articleIds)
+        selectArticles(query.filter("id", "in", articleIds))
+      })
+  }
+  else {
+    query = review.articles
+      .skip(offset)
+      .limit(limit)
+      .order("rayyan_id", true)
+
+    selectArticles(query)
+  }
+
   return deferred.promise
 }
 
@@ -51,7 +108,7 @@ M.setArticles = function(review, articlesAndCustomizations, offset, $q) {
   review.downloaded_articles = (review.downloaded_articles || 0) + articles.length;
 
   persistence.flush(function(){
-    M.getArticles(review, offset, articles.length, $q).then(function(articles){
+    M.getArticles(review, offset, articles.length, null, $q).then(function(articles){
       deferred.resolve(articles);
     })
   });

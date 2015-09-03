@@ -20,15 +20,15 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     return deferred.promise;
   }
 
-  var getArticles = function(review, offset, limit) {
+  var getArticles = function(review, offset, limit, facetValues) {
     var deferred = $q.defer()
-    rayyanLocalService.getArticles(review, offset, limit)
+    rayyanLocalService.getArticles(review, offset, limit, facetValues)
       .then(function(articles){
-        if (articles.length == limit) {
+        if (articles.length == limit || review.downloaded_articles >= review.total_articles) {
           // done from local, return local articles
           deferred.resolve(articles)
         }
-        else {
+        else if (!facetValues || _.isEmpty(facetValues)) {
           // need a remote trip
           deferred.notify(articles);
           if (review.download_pending) {
@@ -52,6 +52,9 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
               })
           }
         }
+        else {
+          deferred.reject("no_remote_filtering")
+        }
       })
     return deferred.promise;
   }
@@ -60,46 +63,42 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     return facetType == 'inclusions' ? 'inclusions_clean' : null;
   }
 
-  var getFacets = function(review, facetTypes) {
+  var getFacets = function(review, facetTypes, forceRemote) {
     var deferred = {}, promises = {}
+    if (!facetTypes || facetTypes.length == 0)
+      facetTypes = ["inclusions", "labels", "reasons", "topics", "highlights_1", "highlights_2"]
 
     // partition facetTypes to clean and dirty sets
-    var cleanAndDirtySets = _.partition(facetTypes, function(facetType){
-      var key = cleanKey(facetType)
-      return key && review[key]
-    })
+    var dirtyFacetTypes = facetTypes
 
-    var injectInclusions = function(promise) {
-      promise.then(function(inclusions){
-        return review.inclusions = inclusions
+    if (!forceRemote) {
+      var cleanAndDirtySets = _.partition(facetTypes, function(facetType){
+        var key = cleanKey(facetType)
+        return key && review[key]
       })
+      // resolve clean set from local db
+      _.each(cleanAndDirtySets[0], function(facetType){
+        console.log("facet is clean, retrieving from local db for review", facetType, review.rayyan_id)
+        promises[facetType] = rayyanLocalService.getFacet(review, facetType)
+      })
+      // set dirty set
+      dirtyFacetTypes = cleanAndDirtySets[1]
     }
 
-    // resolve clean set from local db
-    _.each(cleanAndDirtySets[0], function(facetType){
-      console.log("facet is clean, retrieving from local db for review", facetType, review.rayyan_id)
-      promises[facetType] = rayyanLocalService.getFacet(review, facetType)
-      if (facetType == 'inclusions')
-        injectInclusions(promises[facetType])
-    })
-
     // resolve dirty set from remote server
-    var dirtyFacetTypes = cleanAndDirtySets[1]
     if (dirtyFacetTypes.length > 0) {
       console.log("facets are dirty, retrieving from remote server for review", dirtyFacetTypes, review.rayyan_id)
       // prepare promises for remote callbacks for each facetType
       _.each(dirtyFacetTypes, function(facetType){
         deferred[facetType] = $q.defer()
         promises[facetType] = deferred[facetType].promise
-        if (facetType == 'inclusions')
-          injectInclusions(promises[facetType])
       })
       rayyanRemoteService.getFacets(review.rayyan_id, dirtyFacetTypes)
         .then(function(facets){
           // remote request succeeded
           console.log("facets retrieved from remote server for review", dirtyFacetTypes, review.rayyan_id, facets)
-          _.each(facets, function(facet, facetType){
-            rayyanLocalService.setFacet(review, facetType, facet)
+          _.each(dirtyFacetTypes, function(facetType){
+            rayyanLocalService.setFacet(review, facetType, facets[facetType])
               .then(function(facet){
                 console.log("facet saved to local db for review", facetType, review.rayyan_id)
                 var key = cleanKey(facetType)
@@ -123,17 +122,11 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     }
 
     return $q.all(promises)
-  }
-
-  var getLabels = function(reviewId) {
-    // TODO replace by getFacets
-    return rayyanRemoteService.getLabels(reviewId)
-      .then(function(labels){
-        return labels;
-      }, function(){
-        // on error, return empty array
-        // TODO: return local labels
-        return [];
+      .then(function(promises){
+        console.log("Here are all retrieved facets to inject into review", promises)
+        if (!review.filters) review.filters = {}
+        _.extend(review.filters, promises)
+        return promises
       })
   }
 
@@ -333,7 +326,6 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     getDisplayName: rayyanLocalService.getDisplayName,
     getReviews: getReviews,
     getReview: rayyanLocalService.getReview,
-    getLabels: getLabels,
     getArticles: getArticles,
     getFacets: getFacets,
     toggleBlind: rayyanRemoteService.toggleBlind,

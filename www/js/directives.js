@@ -14,9 +14,7 @@ angular.module('rayyan.directives', [])
     }
 
     scope.shouldHideClearButton = function() {
-      var hidden = _.isUndefined(_.find(scope.facet.items, function(item){return item.selected}))
-      scope.facet.hasSelection = hidden ? 0 : 1
-      return hidden
+      return _.isUndefined(_.find(scope.facet.items, function(item){return item.selected}))
     }
 
     scope.clearItems = function($event) {

@@ -106,9 +106,9 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
         return M.getReview(reviewId, $q)
       })
     },
-    getArticles: function(review, offset, limit) {
+    getArticles: function(review, offset, limit, facetValues) {
       return getReady().then(function(){
-        return M.getArticles(review, offset, limit, $q)
+        return M.getArticles(review, offset, limit, facetValues, $q)
       })
     },
     setArticles: function(review, articles, offset) {
