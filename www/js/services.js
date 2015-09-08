@@ -294,11 +294,18 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
       return $q.all(promises)
     }
 
+    var fail = function(error) {
+      deferred.reject(error)
+    }
+
     var processBatch = function() {
       rayyanLocalService.getJournalPendingActionsCount()
         .then(function(count){
           deferred.notify(count)
-          rayyanLocalService.getJournalPendingActionsBatch(batchSize)
+          if (count == 0)
+            deferred.resolve()
+          else {
+            rayyanLocalService.getJournalPendingActionsBatch(batchSize)
             .then(function(actions){
               if (actions.length == 0)
                 deferred.resolve()
@@ -313,12 +320,13 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
                         .then(function(count){
                           deferred.notify(count)
                           deferred.resolve()
-                        })
+                        }, fail)
                     }
                   )
               }
-            })
-        })
+            }, fail)
+          }
+        }, fail)
     }
 
     processBatch();
@@ -334,13 +342,15 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
   }
 
   return {
+    init: rayyanLocalService.init, // must call prior to any other call below
     login: function(demo) {
       // if browser, cheat login
       return (!window.cordova ? rayyanLocalService.login() : rayyanRemoteService.login(demo));
     },
     logout: function() {
+      rayyanLocalService.logout()
       // if browser, don't revoke token
-      !window.cordova ? rayyanLocalService.logout() : rayyanRemoteService.logout()
+      if (window.cordova) rayyanRemoteService.logout()
     },
     loggedIn: rayyanLocalService.loggedIn,
     getDisplayName: rayyanLocalService.getDisplayName,

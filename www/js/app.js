@@ -6,7 +6,7 @@
 // 'rayyan.controllers' is found in controllers.js
 angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services'])
 
-.run(function($ionicPlatform) {
+.run(function($rootScope, $ionicPlatform, rayyanAPIService) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -18,6 +18,11 @@ angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.se
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+    rayyanAPIService.init()
+      .then(function(){
+        // broadcast rayyan service ready
+        $rootScope.$broadcast("rayyan.ready")
+      })
   });
 })
 
@@ -60,15 +65,6 @@ angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.se
       }
     }
   })
-
-  .state('app.share', {
-    url: '/share',
-    views: {
-      'menuContent': {
-        templateUrl: 'templates/share.html'
-      }
-    }
-  });
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/reviews');

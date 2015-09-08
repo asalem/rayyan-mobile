@@ -2,10 +2,11 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
 
 .factory('rayyanLocalService', function($localStorage, rayyanRemoteService, $ionicPlatform, $q) {
 
-  var initialized = false;
+  var initialized = false, initializing = false;
 
   // init persistence and optionally run migrations
   var initDatabase = function() {
+    console.log("db: initializing database")
     persistence.store.cordovasql.config(
       persistence,
       'rayyan-mobile',
@@ -19,6 +20,7 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
   }
 
   var defineMigrations = function() {
+    console.log("db: definig migrations")
     var deferred = $q.defer()
     // M = {}
     // TODO load all migrations/models through requirejs([], callback)
@@ -27,9 +29,11 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
   }
 
   var runMigrations = function() {
+    console.log("db: running migrations")
     var deferred = $q.defer()
     persistence.migrations.init(function() {
       persistence.migrate(function(){
+        console.log("db: migrations done")
         deferred.resolve();
       });
     });
@@ -40,13 +44,14 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     persistence.migrate(0, _.isFunction(callback) ? callback : function(){})
   }
 
-  var getReady = function(failImmediately) {
+  var init = function() {
     var deferred = $q.defer()
     if (initialized)
       deferred.resolve()
-    else if (failImmediately)
-      deferred.reject()
+    else if (initializing)
+      deferred.reject("rayyan_db_initialize_pending")
     else {
+      initializing = true;
       $ionicPlatform.ready(function() {
         initDatabase();
         defineMigrations()
@@ -62,6 +67,16 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     return deferred.promise;
   }
 
+  var getReady = function() {
+    console.log("in getReady, caller", arguments.callee.caller.toString())
+    var deferred = $q.defer()
+    if (initialized)
+      deferred.resolve()
+    else
+      deferred.reject("rayyan_db_not_initialized")
+    return deferred.promise;
+  }
+
   var injectExcludeInPlan = function(plan) {
     // if any key in the plan is an exclusion reason, then auto-exclude article
     if (_.some(plan, function(value, key){return key != 'included' && value > 0 && !M.labelPredicate(key)}))
@@ -71,6 +86,7 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
   }
 
   return {
+    init: init, // must call prior to any other call below (except login which is fake anyway)
     login: function() {
       // testing on browser, cheat accessToken
       rayyanRemoteService.setAccessToken(

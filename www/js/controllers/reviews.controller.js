@@ -106,8 +106,10 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     }
   });
 
-  if (rayyanAPIService.loggedIn())
-    $scope.refreshReviews()
+  $scope.$on("rayyan.ready", function() {  
+    if (rayyanAPIService.loggedIn())
+      $rootScope.refreshReviews()
+  })
 
   $scope.reviewClicked = function(review) {
     if (review.total_articles > 0) {
