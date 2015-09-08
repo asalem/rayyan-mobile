@@ -56,10 +56,6 @@
   font-weight: bold;
 }
 
-.review-downloaded-all {
-  color: green;
-}
-
 .review-download-error {
   color: red;
 }
@@ -89,10 +85,10 @@ ion-spinner.review-download-pending svg{
 
 .review-trophy {
   position: absolute;
-  top: -3px !important;
-  left: 37px;
+  top: -5px !important;
+  left: 31px;
   color: blue;
-  font-size: 36px !important;
+  font-size: 50px !important;
 }
 
 .review-download-progress {

@@ -132,13 +132,13 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     else if (review.download_error)
       return "ion-alert-circled review-download-error"
     else if (review.downloaded_articles >= review.total_articles)
-      return "ion-checkmark-circled review-downloaded-all";
+      return "";
     else
       return ionic.Platform.isIOS() ? 'ion-ios-cloud-download-outline' : 'ion-android-download';
   }
 
   $scope.iconClicked = function($event, review) {
-    if (review.total_articles == review.downloaded_articles)
+    if (review.downloaded_articles >= review.total_articles)
       return;
     else if (review.download_pending) {
       console.log("stop download")
