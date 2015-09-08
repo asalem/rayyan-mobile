@@ -43,6 +43,10 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
       function(reviews) {
         // notified with local reviews, will be needed if offline
         setReviews(reviews)
+        // show local inclusion facets asap
+        _.each($rootScope.reviews, function(review){
+          rayyanAPIService.getFacets(review, ["inclusions"], "local")
+        })
       })
       .finally(function(){
         //Stop the ion-refresher from spinning

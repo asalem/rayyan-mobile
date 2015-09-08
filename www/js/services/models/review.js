@@ -66,6 +66,10 @@ M.setReviews = function(reviews, $q) {
               console.log("inclusions_etag unchanged for review", localReview.rayyan_id)
               localReview.inclusions_clean = true
             }
+            else {
+              console.log("inclusions_etag changed for review", localReview.rayyan_id)
+              localReview.inclusions_clean = false
+            }
           }
           localReview[key] = value
         })
