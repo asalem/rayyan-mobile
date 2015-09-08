@@ -22,7 +22,8 @@
     "com.ionic.keyboard",
     "cordova-sqlite-storage",
     "cordova-plugin-inappbrowser",
-    "cordova-plugin-network-information"
+    "cordova-plugin-network-information",
+    "nl.x-services.plugins.socialsharing"
   ],
   "cordovaPlatforms": [
     "ios",

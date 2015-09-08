@@ -17,7 +17,7 @@
       <h1 class="title">Rayyan QCRI</h1>
     </ion-header-bar>
     <ion-content>
-      <ion-list ng-controller="LoginController">
+      <ion-list ng-controller="MenuController">
         <ion-item menu-close href="#/app/login" ng-if="!loggedIn()">
           Sign in
         </ion-item>
@@ -27,13 +27,13 @@
         <ion-item menu-close href="#/app/reviews">
           Reviews
         </ion-item>
-        <ion-item menu-close href="#/app/share">
+        <ion-item menu-close href="#" ng-click="shareApp()">
           Share app
         </ion-item>
-        <ion-item menu-close href="#" ng-click="menuClicked('http://rayyan.qcri.org/')">
+        <ion-item menu-close href="#" ng-click="openLink('http://rayyan.qcri.org/')">
           Visit Rayyan
         </ion-item>
-        <ion-item menu-close href="#" ng-click="menuClicked('http://support.rayyan.qcri.org/')">
+        <ion-item menu-close href="#" ng-click="openLink('http://support.rayyan.qcri.org/')">
           Contact us
         </ion-item>
       </ion-list>

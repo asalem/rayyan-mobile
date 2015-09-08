@@ -59,6 +59,11 @@ angular.module('footer.controller', ['rayyan.services'])
         processJournal();
       }
     }
+    else {
+      console.log("browser, no Cordova, not initializing network information")
+      // TODO: connection status for browser
+      // setConnectionStatus('online');
+    }
   })
 
   $scope.journalProcessingIcon = function() {
@@ -75,8 +80,6 @@ angular.module('footer.controller', ['rayyan.services'])
 
   $rootScope.pendingActionsCount = 0;
   $scope.footerText = "Checking connection...";
-  // TODO: connection status for !window.cordova
-  // setConnectionStatus('online');
 
   rayyanAPIService.getJournalPendingActionsCount()
     .then(function(count){

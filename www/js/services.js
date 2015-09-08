@@ -339,8 +339,8 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
       return (!window.cordova ? rayyanLocalService.login() : rayyanRemoteService.login(demo));
     },
     logout: function() {
-      rayyanRemoteService.logout()
-      rayyanLocalService.logout()
+      // if browser, don't revoke token
+      !window.cordova ? rayyanLocalService.logout() : rayyanRemoteService.logout()
     },
     loggedIn: rayyanLocalService.loggedIn,
     getDisplayName: rayyanLocalService.getDisplayName,
