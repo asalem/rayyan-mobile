@@ -14,10 +14,14 @@
   <preference name="DisallowOverscroll" value="true"/>
   <preference name="android-minSdkVersion" value="16"/>
   <preference name="BackupWebStorage" value="none"/>
+  <preference name="SplashScreen" value="screen"/>
+  <preference name="SplashScreenDelay" value="3000"/>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>
   <feature name="InAppBrowser">
-      <param name="ios-package" value="CDVInAppBrowser" />
+    <param name="ios-package" value="CDVInAppBrowser"/>
   </feature>
+  <platform name="android">
+  </platform>
 </widget>
