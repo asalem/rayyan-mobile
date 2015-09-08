@@ -19,11 +19,12 @@ angular.module('rayyan.utils', [])
 
 .factory('rayyanHighlightsManager', function(){
 
-  return function(keywords)
+  return function(keywords, wholeWords)
   {
     var ana = this
     var regex
     ana.keywords = _.compact(keywords)
+    ana.wholeWords = wholeWords
 
     var construct_regex = function()
     {
@@ -31,7 +32,8 @@ angular.module('rayyan.utils', [])
       ana.keywords.sort(function(a, b){
         return b.length - a.length
       })
-      var str = "\\b(" + ana.keywords.join("|") + ")\\b"
+      var list = "(" + ana.keywords.join("|") + ")"
+      var str = ana.wholeWords ? ("\\b" + list + "\\b") : list
       // replace spaces/punctuations in keywords by spaces/punctuations in regex
       str = str.replace(/[\s-'"\.,;]+/g, "[\\s-'\"\\.,;]+")
       regex = new RegExp(str, "ig")

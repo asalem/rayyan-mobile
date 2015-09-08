@@ -5,10 +5,12 @@
     "ionic": "driftyco/ionic-bower#1.0.1"
   },
   "dependencies": {
-    "persistence": "hammady/persistencejs#master",
+    "angular-chart.js": "~0.7.6",
+    "moment": "~2.10.6",
     "ngstorage": "~0.3.7",
-    "underscore": "~1.8.3",
+    "persistence": "hammady/persistencejs#master",
     "requirejs": "~2.1.20",
-    "angular-chart.js": "~0.7.6"
+    "squel": "~4.1.1",
+    "underscore": "~1.8.3"
   }
 }

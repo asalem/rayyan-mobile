@@ -1,51 +1,61 @@
 <ion-view view-title="Reviews">
-  <ion-content class="has-footer">
-    <ion-refresher on-refresh="doRefresh()">
+  <ion-content class="has-footer" delegate-handle="reviewsContent" >
+    <ion-refresher on-refresh="refreshReviews()">
     </ion-refresher>
     
-    <ion-list ng-repeat="reviewGroup in reviewGroups">
-      <ion-item class="item-divider">
-        {{reviewGroup.name}}
-      </ion-item>
-      <ion-item ng-if="reviewGroup.reviews.length == 0" class="item item-body">
-        {{reviewGroup.emptyMessage}}
-      </ion-item>
-      <ion-item href="#" ng-click="reviewClicked(review)"
-      class="item item-icon-right item-thumbnail-left" ng-repeat="review in reviewGroup.reviews">
-        <canvas ng-if="shouldDrawChart(review)"
-          class="decisions-chart chart chart-doughnut"
-          data="[review.filters.inclusions[1].count, review.filters.inclusions[2].count, review.filters.inclusions[0].count]"
-          labels="['Included', 'Excluded', 'Undecided']"
-          colours="chartColors"
-          options="{animateRotate:false, animationSteps:1, percentageInnerCutout:70, segmentShowStroke:false, onAnimationComplete: drawChartText}">
-        </canvas>
-        <h2 class="item-italic-{{!review.owner}}">{{review.title}}</h2>
-        <div>
-          {{review.total_articles}} articles
-        </div>
+    <div id="#/app/reviews">
+      <ion-list ng-repeat="reviewGroup in reviewGroups">
+        <ion-item class="item-divider">
+          {{reviewGroup.name}}
+          <div ng-if="$first" class="reviews-updated-at">
+            Updated {{lastUpdatedAt}}
+          </div>
+        </ion-item>
+        <ion-item ng-if="reviewGroup.reviews.length == 0" class="item item-body">
+          {{reviewGroup.emptyMessage}}
+        </ion-item>
+        <ion-item href="#" ng-click="reviewClicked(review)"
+        class="review-item item item-icon-right item-thumbnail-left" ng-repeat="review in reviewGroup.reviews">
+          <div ng-if="shouldDrawChart(review)">
+            <canvas
+              class="decisions-chart chart chart-doughnut"
+              data="[review.filters.inclusions[1].count, review.filters.inclusions[2].count, review.filters.inclusions[0].count]"
+              labels="['Included', 'Excluded', 'Undecided']"
+              colours="chartColors"
+              options="{animateRotate:false, animationSteps:1, percentageInnerCutout:70, segmentShowStroke:false, onAnimationComplete: drawChartText, responsive: false}">
+            </canvas>
+            <i ng-if="review.filters.inclusions[0].count == 0" class="review-trophy icon ion-trophy"></i>
+          </div>
+          <h2 class="item-italic-{{!review.owner}}">{{review.title}}</h2>
+          <div>
+            {{review.total_articles}} articles
+          </div>
 
-        <progress
-        ng-if="review.total_articles > 0 && review.downloaded_articles > 0 && review.downloaded_articles < review.total_articles"
-          value="{{review.downloaded_articles}}"
-          min="0" max="{{review.total_articles}}"
-          style="transition: width 0.1s;">
-        </progress>
+          <progress
+          ng-if="review.total_articles > 0 && review.downloaded_articles > 0 && review.downloaded_articles < review.total_articles"
+            class="review-download-progress"
+            value="{{review.downloaded_articles}}"
+            min="0" max="{{review.total_articles}}"
+            style="transition: width 0.1s;">
+          </progress>
 
-        <i ng-if="!review.download_pending" class="icon {{reviewIcon(review)}}"
-        ng-click="iconClicked($event, review)">
-        </i>
+          <div class="review-icons">
+            <i ng-if="!review.download_pending" class="icon {{reviewIcon(review)}}"
+            ng-click="iconClicked($event, review)">
+            </i>
 
-        <i ng-if="review.download_pending" class="icon" ng-click="iconClicked($event, review)">
-          <ion-spinner class="review-download-pending"></ion-spinner>
-        </i>
+            <i ng-if="review.download_pending" class="icon" ng-click="iconClicked($event, review)">
+              <ion-spinner class="review-download-pending"></ion-spinner>
+            </i>
+          </div>
 
+          <ion-option-button class="button-assertive"
+                         ng-click="clearReviewArticles(review)">
+            Clear
+          </ion-option-button>
 
-        <ion-option-button class="button-assertive"
-                       ng-click="clearReviewArticles(review)">
-          Clear
-        </ion-option-button>
-
-      </ion-item>
-    </ion-list>
+        </ion-item>
+      </ion-list>
+    </div>
   </ion-content>
 </ion-view>

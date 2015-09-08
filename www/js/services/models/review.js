@@ -96,3 +96,8 @@ M.setReviews = function(reviews, $q) {
 
   return deferred.promise
 }
+
+M.setBlindReview = function(review, blind, $q) {
+  review.blind = blind
+  persistence.flush(function(){})
+}

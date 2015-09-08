@@ -7,8 +7,17 @@
   </ion-nav-buttons>
   <ion-content delegate-handle="articlesContent" class="has-footer">
 
+    <div ng-if="no_remote_filtering && articles.length > 0" class="item item-body articles-warning">
+      To get all filtered articles, you have to download the review first.
+      Please go back and click on the download icon for this review.
+      Alternatively, you can just remove the filter to stream through all the articles.
+    </div>
+
     <div class="list card" ng-repeat="article in articles">
       <div class="item item-body">
+        <div class="article-counter">
+          {{$index + 1}}/{{articlesTotal}}
+        </div>
         <div class="article-title" ng-bind-html="highlightTitle(highlight2(highlight1(article.title)))"></div>
         <p ng-bind-html="highlightAuthors('Authors: ' + article.authors)">
         </p>
@@ -29,6 +38,10 @@
           <h2>
             [NO ABSTRACT]
           </h2>
+        </div>
+        <div ng-if="article.topics">
+          <h3 ng-bind-html="'Topics: ' + limit(highlightTopics(highlight2(highlight1(article.topics))))">
+          </h3>
         </div>
         <p>
           <div class="labels-container">
@@ -71,21 +84,21 @@
 
     <ion-infinite-scroll ng-if="!noMoreArticlesAvailable" on-infinite="loadMore()" distance="10%"></ion-infinite-scroll>
   
-    <div ng-if="noMoreArticlesAvailable && !errorLoadingMore && !download_pending && !no_remote_filtering" class="item item-body">
+    <div ng-if="noMoreArticlesAvailable && !errorLoadingMore && !download_pending && !no_remote_filtering" class="item item-body {{facetCount==0 ? 'articles-congrats' : 'articles-warning'}}">
       <span ng-if="facetCount==0">Congratulations, you have reached the end of this review, no more articles to screen, Yay!</span>
       <span ng-if="facetCount>0">No more articles to screen. Note that you have {{facetCount}}
       filter{{facetCount==1?'':'s'}} active. To get more articles, change your filter{{facetCount==1?'':'s'}}.</span>
     </div>
 
-    <div ng-if="errorLoadingMore" class="item item-body">
-      Error loading more articles.
+    <div ng-if="errorLoadingMore" class="item item-body articles-error">
+      Error loading articles.
     </div>
 
-    <div ng-if="download_pending" class="item item-body">
+    <div ng-if="download_pending" class="item item-body articles-warning">
       Review download is pending, please wait until it finishes then come back again.
     </div>
 
-    <div ng-if="no_remote_filtering" class="item item-body">
+    <div ng-if="no_remote_filtering" class="item item-body articles-warning">
       To get all filtered articles, you have to download the review first.
       Please go back and click on the download icon for this review.
       Alternatively, you can just remove the filter to stream through all the articles.

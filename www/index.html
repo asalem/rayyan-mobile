@@ -24,6 +24,8 @@
     <script src="lib/Chart.js/Chart.min.js"></script>
     <script src="lib/angular-chart.js/dist/angular-chart.min.js"></script>
     <script src="lib/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="lib/squel/squel.min.js"></script>
+    <script src="lib/moment/moment.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
@@ -65,8 +67,13 @@
     ng-controller="FooterController" ng-click="footerClicked()">
         {{footerText}}
         &nbsp;
-        <ion-spinner ng-if="journalProcessing" class="journal-processing-pending"></ion-spinner>
-        <span class="pending-actions-count">{{pendingActionsText()}}</span>
+        <span ng-if="journalProcessing" class="journal-processing-pending">
+            <i class="icon {{journalProcessingIcon()}}"></i>
+        </span>
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count">{{pendingActionsCount}}</span>
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count-icon">
+            <i class="icon {{pendingActionsIcon()}}"></i>
+        </span>
     </ion-footer-bar>
 
   </body>

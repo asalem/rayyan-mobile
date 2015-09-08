@@ -24,11 +24,12 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     var deferred = $q.defer()
     rayyanLocalService.getArticles(review, offset, limit, facetValues)
       .then(function(articles){
-        if (articles.length == limit || review.downloaded_articles >= review.total_articles) {
+        var articlesLength = articles.length - 1  // last one is total articles
+        if (articlesLength == limit || review.downloaded_articles >= review.total_articles) {
           // done from local, return local articles
           deferred.resolve(articles)
         }
-        else if (!facetValues || _.isEmpty(facetValues)) {
+        else if (_.isEmpty(facetValues)) {
           // need a remote trip
           deferred.notify(articles);
           if (review.download_pending) {
@@ -38,8 +39,8 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
           else {
             // mark review as download pending, so that no other function can conflict with this
             review.download_pending = true;
-            var newOffset = offset + articles.length
-            rayyanRemoteService.getArticles(review.rayyan_id, newOffset, limit - articles.length)  // fetch remote articles, TODO: optional
+            var newOffset = offset + articlesLength
+            rayyanRemoteService.getArticles(review.rayyan_id, newOffset, limit - articlesLength)  // fetch remote articles, TODO: optional
               .then(function(articles){
                 rayyanLocalService.setArticles(review, articles, newOffset) // save remote articles locally
                   .then(function(articles){
@@ -53,6 +54,9 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
           }
         }
         else {
+          // notify with whatever we have from local, probably incomplete results
+          deferred.notify(articles);
+          // then reject with error no_remote_filtering
           deferred.reject("no_remote_filtering")
         }
       })
@@ -63,27 +67,35 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     return facetType == 'inclusions' ? 'inclusions_clean' : null;
   }
 
-  var getFacets = function(review, facetTypes, forceRemote) {
+  var getFacets = function(review, facetTypes, forceMethod) {
     var deferred = {}, promises = {}
     if (!facetTypes || facetTypes.length == 0)
       facetTypes = ["inclusions", "labels", "reasons", "topics", "highlights_1", "highlights_2"]
 
     // partition facetTypes to clean and dirty sets
-    var dirtyFacetTypes = facetTypes
+    var cleanFacetTypes = facetTypes, dirtyFacetTypes = facetTypes
 
-    if (!forceRemote) {
-      var cleanAndDirtySets = _.partition(facetTypes, function(facetType){
-        var key = cleanKey(facetType)
-        return key && review[key]
-      })
-      // resolve clean set from local db
-      _.each(cleanAndDirtySets[0], function(facetType){
-        console.log("facet is clean, retrieving from local db for review", facetType, review.rayyan_id)
-        promises[facetType] = rayyanLocalService.getFacet(review, facetType)
-      })
-      // set dirty set
-      dirtyFacetTypes = cleanAndDirtySets[1]
+    switch(forceMethod) {
+      case 'local':
+        dirtyFacetTypes = []
+      break;
+      case 'remote':
+        cleanFacetTypes = []
+      break;
+      default:
+        var cleanAndDirtySets = _.partition(facetTypes, function(facetType){
+          var key = cleanKey(facetType)
+          return key && review[key]
+        })
+        cleanFacetTypes = cleanAndDirtySets[0]
+        dirtyFacetTypes = cleanAndDirtySets[1]
     }
+  
+    // resolve clean set from local db
+    _.each(cleanFacetTypes, function(facetType){
+      console.log("facet is clean, retrieving from local db for review", facetType, review.rayyan_id)
+      promises[facetType] = rayyanLocalService.getFacet(review, facetType)
+    })
 
     // resolve dirty set from remote server
     if (dirtyFacetTypes.length > 0) {
@@ -150,7 +162,8 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
           else {
             rayyanLocalService.setArticles(review, articles, offset) // save remote articles locally
               .then(function(articles){
-                if (articles.length < limit || !review.download_pending) {
+                var articlesLength = articles.length - 1  // last one is total articles
+                if (articlesLength < limit || !review.download_pending) {
                   review.download_pending = false;
                   deferred.resolve(); // finished downloading all articles, or download cancelled by another function
                 }
@@ -313,6 +326,13 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     return deferred.promise;
   }
 
+  var toggleBlind = function(review) {
+    rayyanRemoteService.toggleBlind(review.rayyan_id)
+      .then(function(blind){
+        rayyanLocalService.setBlind(review, blind);
+      })
+  }
+
   return {
     login: function(demo) {
       // if browser, cheat login
@@ -328,12 +348,12 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     getReview: rayyanLocalService.getReview,
     getArticles: getArticles,
     getFacets: getFacets,
-    toggleBlind: rayyanRemoteService.toggleBlind,
     downloadReviewArticles: downloadReviewArticles,
     cancelDownloadReviewArticles: cancelDownloadReviewArticles,
     clearReviewArticles: clearReviewArticles,
     applyCustomization: applyCustomization,
     processJournalPlans: processJournalPlans,
-    getJournalPendingActionsCount: rayyanLocalService.getJournalPendingActionsCount
+    getJournalPendingActionsCount: rayyanLocalService.getJournalPendingActionsCount,
+    toggleBlind: toggleBlind
   }
 })

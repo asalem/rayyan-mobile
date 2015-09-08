@@ -5,8 +5,6 @@ persistence.defineMigration(1, {
       t.text('title');
       t.integer('total_articles');
       t.integer('downloaded_articles');
-      t.integer('included');
-      t.integer('excluded');
       t.text('articles_etag');
       t.text('labels_etag');
       t.text('inclusions_etag');

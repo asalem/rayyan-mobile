@@ -1,6 +1,7 @@
 angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
 
-.controller('ReviewsController', function($rootScope, $scope, $location, rayyanAPIService, $ionicListDelegate) {
+.controller('ReviewsController', function($rootScope, $scope, $location, 
+  rayyanAPIService, $ionicListDelegate, $localStorage, $ionicPopup) {
 
   $rootScope.reviewFullyDownloaded = function(review) {
     return review.total_articles > 0 && review.downloaded_articles >= review.total_articles
@@ -12,7 +13,7 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     $rootScope.reviewGroups = [
       {
         reviews: groups[0],
-        name: "Offline",
+        name: "Downloaded",
         emptyMessage: "Reviews that you download from below will appear here. "
           + "Once downloaded, you can do your screening as usual, even if your are offline. "
           + "The next time you are online, it will sync automatically to Rayyan servers. "
@@ -26,11 +27,15 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     ]
   }
 
-  $scope.doRefresh = function() {
+  $scope.lastUpdatedAt = $localStorage.lastUpdatedAt ? moment($localStorage.lastUpdatedAt).calendar() : '--'
+
+  $rootScope.refreshReviews = function() {
     rayyanAPIService.getReviews()
       .then(function(reviews){
         // online: remote reviews
         setReviews(reviews)
+        $localStorage.lastUpdatedAt = new Date()
+        $scope.lastUpdatedAt = moment().calendar()
       },
       function(error) {
         // offline: fallback to local reviews
@@ -77,8 +82,8 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     var valueLabel = Math.round(100 * decided / (decided + undecided)) + '%';
 
     //setup the font and center it's position
-    var fontSize = undecided == 0 ? '30' : '40';
-    this.chart.ctx.font = 'Bold '+fontSize+'pt Verdana';
+    if (undecided == 0) return;
+    this.chart.ctx.font = 'Bold 16px Verdana';
     this.chart.ctx.fillStyle = '#000';
     this.chart.ctx.textAlign = 'center';
     this.chart.ctx.textBaseline = 'middle';
@@ -102,7 +107,7 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
   });
 
   if (rayyanAPIService.loggedIn())
-    $scope.doRefresh()
+    $scope.refreshReviews()
 
   $scope.reviewClicked = function(review) {
     if (review.total_articles > 0) {
@@ -136,21 +141,28 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     else {
       console.log("start download")
 
-      rayyanAPIService.getFacets(review)
+      rayyanAPIService.getFacets(review, null, "remote")
 
       rayyanAPIService.downloadReviewArticles(review)
         .then(function(){
           // to move downloaded review to the offline group
           setReviews($rootScope.reviews)
         }, function(error){
+          var message = ""
           switch(error) {
             case "articles_etag_changed":
-              alert("Review is being updated on the server, please wait until it is done then refresh this page and try again")
+              message = "Review is being updated on the server, please wait until it is done then refresh this page and try again"
               break;
             case "server_error":
-              alert("Error connecing to the server, please try again later")
+              message = "Error connecing to the server, please try again later"
               break;
+            default:
+              message = "Unknown error"
           }
+          $ionicPopup.alert({
+            title: "Error",
+            template: message
+          })
         })
     }
     $event.preventDefault();

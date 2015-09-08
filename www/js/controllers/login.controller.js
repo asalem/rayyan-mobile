@@ -6,10 +6,7 @@ angular.module('login.controller', ['rayyan.services'])
   $scope.login = function() {
     rayyanAPIService.login()
       .then(function(){
-        rayyanAPIService.getReviews()
-          .then(function(reviews){
-            $rootScope.reviews = reviews
-          })
+        $rootScope.refreshReviews()
       })
   }
   $scope.logout = function() {

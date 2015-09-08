@@ -3,7 +3,7 @@ angular.module('facets.controller', [])
 .controller('FacetsController', function($rootScope, $scope, $ionicScrollDelegate) {
 
   var searchFacets = {
-    search: '',
+    search: 'All',
     titleSearch: 'Titles',
     abstractSearch: 'Abstracts',
     authorSearch: 'Authors'
@@ -19,6 +19,7 @@ angular.module('facets.controller', [])
   }
 
   var updateListFacetsItems = function() {
+    console.log("Now updating facets widgets")
     // update list facet items with new items, preserving old selections
     var oldSelectedValues = getSelectedListValues()
     _.each(listFacets, function(title, name){
@@ -91,4 +92,7 @@ angular.module('facets.controller', [])
     updateListFacetsItems()
   })
   
+  $scope.$on('facets.updated', function(e) {
+    updateListFacetsItems()
+  })
 })

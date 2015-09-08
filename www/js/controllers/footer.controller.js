@@ -4,19 +4,24 @@ angular.module('footer.controller', ['rayyan.services'])
 
   var journalTimer;
 
+  $scope.journalProcessing = false
+
   var processJournal = function() {
-    console.log("Processing journal...")
     if ($scope.journalProcessing) return;
+    console.log("Processing journal...")
     $scope.journalProcessing = true
     rayyanAPIService.processJournalPlans()
       .then(function(){
-        $scope.journalProcessing = false;
         journalTimer = $timeout(null, 60000)
           .then(processJournal);
       }, null, function(pendingActionsCount){
         console.log("pendingActionsCount", pendingActionsCount)
         $rootScope.pendingActionsCount = pendingActionsCount;
         // try{$scope.$apply();}catch(e){}
+      })
+      .finally(function(){
+        console.log("Finished processing journal")
+        $scope.journalProcessing = false;
       })
   }
 
@@ -56,12 +61,12 @@ angular.module('footer.controller', ['rayyan.services'])
     }
   })
 
-  $scope.pendingActionsText = function() {
-    var count = $rootScope.pendingActionsCount
-    if (count == 0)
-      return "";
-    else
-      return count + " action" + (count > 1 ? 's' : '') + " pending"
+  $scope.journalProcessingIcon = function() {
+    return ionic.Platform.isIOS() ? 'ion-ios-loop-strong' : 'ion-android-sync';
+  }
+
+  $scope.pendingActionsIcon = function() {
+    return ionic.Platform.isIOS() ? 'ion-ios-cloud-upload' : 'ion-android-upload';
   }
 
   $scope.footerClicked = function() {
@@ -71,7 +76,7 @@ angular.module('footer.controller', ['rayyan.services'])
   $rootScope.pendingActionsCount = 0;
   $scope.footerText = "Checking connection...";
   // TODO: connection status for !window.cordova
-  // setConnectionStatus('offline');
+  // setConnectionStatus('online');
 
   rayyanAPIService.getJournalPendingActionsCount()
     .then(function(count){

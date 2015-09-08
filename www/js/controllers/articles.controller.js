@@ -2,9 +2,10 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
 
 .controller('ArticleController', function($rootScope, $scope, $stateParams,
   rayyanAPIService, rayyanHighlightsManager, $ionicSideMenuDelegate,
-  $ionicModal, $ionicScrollDelegate) {
+  $ionicModal, $ionicScrollDelegate, $filter, $ionicPopup) {
   
-  var BATCH_SIZE = 3;
+  var BATCH_SIZE = 5;
+  var LONG_STR_LIMIT = 200
   var STANDARD_EXCLUSION_REASONS = [
     'wrong outcome',
     'wrong drug',
@@ -29,7 +30,10 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
   var highlights1Manager, highlights2Manager,
     titleSearchHighlightManager,
     authorSearchHighlightManager,
-    abstractSearchHighlightManager
+    abstractSearchHighlightManager,
+    topicsSearchHighlightManager
+
+  $scope.articlesTotal = review.total_articles;
 
   var installFacets = function(facets) {
     if (facets.labels) {
@@ -37,16 +41,24 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     }
     if (facets.reasons) {
       var reasons = _.pluck(facets.reasons, 'display')
+      console.log("reasons", reasons)
       $scope.reasons = _.uniq(reasons.concat(STANDARD_EXCLUSION_REASONS)).sort()
     }
     if (facets.highlights_1) {
       var keywords1 = _.pluck(facets.highlights_1, 'display')
-      highlights1Manager = keywords1.length > 0 ? new rayyanHighlightsManager(keywords1) : null
+      highlights1Manager = keywords1.length > 0 ? new rayyanHighlightsManager(keywords1, true) : null
     }
     if (facets.highlights_2) {
       var keywords2 = _.pluck(facets.highlights_2, 'display')
-      highlights2Manager = keywords2.length > 0 ? new rayyanHighlightsManager(keywords2) : null
+      highlights2Manager = keywords2.length > 0 ? new rayyanHighlightsManager(keywords2, true) : null
     }
+  }
+
+  $scope.limit = function(input) {
+    if (input.length <= LONG_STR_LIMIT)
+      return input
+    else
+      return $filter('limitTo')(input, LONG_STR_LIMIT) + '&hellip;'
   }
 
   // Begin modal filters view functions
@@ -57,11 +69,14 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     $scope.filtersView = modal;
   });
   $scope.filterIconClicked = function() {
+    $scope.filtersView.show();
+
     // force refresh all facets remotely
-    rayyanAPIService.getFacets(review, null, true)
+    rayyanAPIService.getFacets(review, null, "remote")
       .then(function(facets){
         installFacets(facets)
-        $scope.filtersView.show();
+        // update modal
+        $scope.$broadcast('facets.updated');
       })
   };
   $rootScope.getReviewFacets = function(facetType) {
@@ -72,24 +87,30 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     var facetCount = _.size(facetValues)
     console.log("applying facets", facetCount, facetValues)
 
+    var prepareHighlightsManager = function(facetType, useHighlightFacetTypes) {
+      if (facetCount > 0 && (
+        !_.isEmpty(facetValues.search) ||
+        !_.isEmpty(facetValues[facetType]) || 
+        useHighlightFacetTypes && (
+          !_.isEmpty(facetValues.highlights_1) || 
+          !_.isEmpty(facetValues.highlights_2) ||
+          !_.isEmpty(facetValues.topics) ))) {
+            return new rayyanHighlightsManager(_.flatten([
+              facetValues.search, 
+              facetValues[facetType],
+              facetValues.highlights_1,
+              facetValues.highlights_2,
+              facetValues.topics]))
+      }
+      else
+        return null      
+    }
+
     // prepare highlight managers for search
-    if (facetCount > 0 && (facetValues.search || facetValues.titleSearch)) {
-      titleSearchHighlightManager = new rayyanHighlightsManager([facetValues.search, facetValues.titleSearch])
-    }
-    else
-      titleSearchHighlightManager = null
-
-    if (facetCount > 0 && (facetValues.search || facetValues.authorSearch)) {
-      authorSearchHighlightManager = new rayyanHighlightsManager([facetValues.search, facetValues.authorSearch])
-    }
-    else
-      authorSearchHighlightManager = null
-
-    if (facetCount > 0 && (facetValues.search || facetValues.abstractSearch)) {
-      abstractSearchHighlightManager = new rayyanHighlightsManager([facetValues.search, facetValues.abstractSearch])
-    }
-    else
-      abstractSearchHighlightManager = null
+    titleSearchHighlightManager = prepareHighlightsManager("titleSearch", true)
+    abstractSearchHighlightManager = prepareHighlightsManager("abstractSearch", true)
+    authorSearchHighlightManager = prepareHighlightsManager("authorSearch")
+    topicsSearchHighlightManager = prepareHighlightsManager("topics", true)
 
     articlesOffset = 0
     $scope.facetCount = facetCount
@@ -116,23 +137,34 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
   $scope.facetCount = 0
   // End modal filters view functions
 
-  rayyanAPIService.getFacets(review, ["labels", "reasons", "highlights_1", "highlights_2"])
-    .then(installFacets)
+  rayyanAPIService.getFacets(review, null, "local")
+    .then(function(facets){
+      installFacets(facets)
+      rayyanAPIService.getFacets(review)
+        .then(installFacets)
+    })
+
+  var highlightField = function(manager, input, klass) {
+    return manager ? manager.highlight(input, klass || "highlight-category-search", true) : input
+  }
 
   $scope.highlight1 = function(input) {
-    return highlights1Manager ? highlights1Manager.highlight(input, "highlight-category-1", true) : input
+    return highlightField(highlights1Manager, input, "highlight-category-1")
   }
   $scope.highlight2 = function(input) {
-    return highlights2Manager ? highlights2Manager.highlight(input, "highlight-category-2", true) : input
+    return highlightField(highlights2Manager, input, "highlight-category-2")
   }
   $scope.highlightTitle = function(input) {
-    return titleSearchHighlightManager ? titleSearchHighlightManager.highlight(input, "highlight-category-search", true) : input
+    return highlightField(titleSearchHighlightManager, input)
   }
   $scope.highlightAuthors = function(input) {
-    return authorSearchHighlightManager ? authorSearchHighlightManager.highlight(input, "highlight-category-search", true) : input
+    return highlightField(authorSearchHighlightManager, input)
   }
   $scope.highlightAbstract = function(input) {
-    return abstractSearchHighlightManager ? abstractSearchHighlightManager.highlight(input, "highlight-category-search", true) : input
+    return highlightField(abstractSearchHighlightManager, input)
+  }
+  $scope.highlightTopics = function(input) {
+    return highlightField(topicsSearchHighlightManager, input)
   }
 
   $scope.showBlind = review.users_count > 1
@@ -152,6 +184,7 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
 
     rayyanAPIService.getArticles(review, articlesOffset, BATCH_SIZE, $scope.facetValues)
       .then(function(articles){
+        $scope.articlesTotal = articles.pop()
         console.log("resolved by articles", articles)
         if (articles.length == 0)
           $scope.noMoreArticlesAvailable = true;
@@ -170,6 +203,7 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
             $scope.errorLoadingMore = true;
         }
       }, function(articles){
+        $scope.articlesTotal = articles.pop()
         console.log("notified by articles", articles)
         appendArticlesToScope(articles);
       })
@@ -181,16 +215,25 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
   $scope.articles = [];
 
   $scope.blindIcon = function() {
-    return review.is_blind ? 'ion-eye-disabled' : 'ion-eye'
+    return review.blind ? 'ion-eye-disabled' : 'ion-eye'
   }
 
   $scope.blindClicked = function() {
-    if (!review.owner)
-      alert("Only the review owner can change the blind mode")
+    if (review.owner) {
+      var next = review.blind ? "" : "NOT "
+      $ionicPopup.confirm({
+        title: "Changing blind mode to " + (review.blind ? "off" : "on"),
+        template: "This will make decisions and labels of any collaborator " + next
+          + "visible to others. Are you sure you want to continue?"
+      }).then(function(confirmed){
+        if (confirmed) rayyanAPIService.toggleBlind(review);
+      })
+    }
     else {
-      var next = review.is_blind ? "" : "NOT "
-      if (confirm("This will make decisions and labels of any collaborator "+next+"visible to others. Are you sure you want to continue?"))
-        rayyanAPIService.toggleBlind(reviewId)
+      $ionicPopup.alert({
+        title: "Blind mode is " + (review.blind ? "on" : "off"),
+        template: "Only review owner can change the blind mode."
+      })
     }
   }
 

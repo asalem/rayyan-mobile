@@ -40,10 +40,12 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     persistence.migrate(0, _.isFunction(callback) ? callback : function(){})
   }
 
-  var getReady = function() {
+  var getReady = function(failImmediately) {
     var deferred = $q.defer()
     if (initialized)
       deferred.resolve()
+    else if (failImmediately)
+      deferred.reject()
     else {
       $ionicPlatform.ready(function() {
         initDatabase();
@@ -154,6 +156,11 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     removeJournalAction: function(journalAction) {
       return getReady().then(function(){
         return M.removeJournalAction(journalAction, $q)
+      })
+    },
+    setBlind: function(review, blind)  {
+      return getReady().then(function(){
+        return M.setBlindReview(review, blind, $q)
       })
     }
   }

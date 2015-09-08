@@ -3,7 +3,8 @@ M.Article = persistence.define('Article', {
   rayyan_id: "INT",
   citation: "TEXT",
   full_abstract: "TEXT",
-  authors: "TEXT"
+  authors: "TEXT",
+  topics: "TEXT"
 });
 
 M.Review.hasMany('articles', M.Article, 'review')
@@ -11,64 +12,26 @@ M.Review.hasMany('articles', M.Article, 'review')
 M.getArticles = function(review, offset, limit, facetValues, $q) {
   console.log("in M.getArticles", review, offset, limit, facetValues)
   var deferred = $q.defer();
+  var query;
 
-  // TODO move 2 functions out when converting to angular module
-  var getFilteredArticlesIds = function(review, offset, limit, facetValues) {
-    // manually construct query and return article ids
-    var deferred = $q.defer();
-
-    persistence.transaction(function(tx){
-      var sql = "select id from Article "
-        + "where review = '" + review.id + "' "
-
-      // TODO sanitize search criteria or use a library to construct the query!
-      // TODO persist topics, display them, and search in them
-      // TODO do the rest of the where clauses
-      if (facetValues.search) {
-        sql += "and (article.title like '%"+facetValues.search+"%' "
-          + "or article.full_abstract like '%"+facetValues.search+"%' "
-          + "or article.authors like '%"+facetValues.search+"%') "
-      }
-      if (facetValues.titleSearch) {
-        sql += "and (article.title like '%"+facetValues.titleSearch+"%') "
-      }
-      if (facetValues.authorSearch) {
-        sql += "and (article.authors like '%"+facetValues.authorSearch+"%') "
-      }
-      if (facetValues.abstractSearch) {
-        sql += "and (article.full_abstract like '%"+facetValues.abstractSearch+"%') "
-      }
-
-      sql += "order by rayyan_id asc "
-        + "limit " + limit + " offset " + offset + ";"
-      tx.executeSql(sql, [], function(results) {
-        var ids = _.pluck(results, 'id')
-        console.log(results, ids)
-        deferred.resolve(ids)
-      });
-    })
-
-    return deferred.promise;
-  }
-
-  var selectArticles = function(query) {
+  var selectArticles = function(query, count) {
     query.list(null, function(articles){
       console.log("loaded articles from db", articles)
       M.assignCustomizations(review, articles, $q)
         .then(function(){
+          // push total count at the end
+          articles.push(count)
           deferred.resolve(articles);
         })
     })
   }
 
-  var query
-
   if (!_.isEmpty(facetValues)) {
     query = M.Article.all().order("rayyan_id", true)
-    getFilteredArticlesIds(review, offset, limit, facetValues)
+    M.getFilteredArticlesIds(review, offset, limit, facetValues, $q)
       .then(function(articleIds){
-        console.log("should continue query by the ids", articleIds)
-        selectArticles(query.filter("id", "in", articleIds))
+        var count = articleIds.pop()
+        selectArticles(query.filter("id", "in", articleIds), count)
       })
   }
   else {
@@ -77,7 +40,7 @@ M.getArticles = function(review, offset, limit, facetValues, $q) {
       .limit(limit)
       .order("rayyan_id", true)
 
-    selectArticles(query)
+    selectArticles(query, review.total_articles)
   }
 
   return deferred.promise

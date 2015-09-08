@@ -116,10 +116,11 @@ angular.module('rayyan.remote.service', [])
       baseURI = "http://rayyan.qcridemos.org";
     else {
       // baseURI = "http://127.0.0.1:5000"
-      // baseURI = "http://10.153.236.129:5000"
-      // baseURI = "http://10.5.3.238:5000"
+      // baseURI = "http://10.153.236.32:5000"
+      // baseURI = "http://10.5.3.205:5000"
       // baseURI = "http://rayyan.qcri.org"
-      baseURI = "http://192.168.100.6:5000"
+      baseURI = "http://192.168.100.31:5000"
+      // baseURI = "http://172.20.10.11:5000"
     }
     $localStorage.baseURI = baseURI;
   }
@@ -199,6 +200,15 @@ angular.module('rayyan.remote.service', [])
   }
 
   var transformRemoteFacets = function(facet, facetType) {
+    // override irrelevant rayyan_ids with searchable values (display)
+    var overrideValues = function(collection, overrider) {
+      return _.map(collection, function(facetRow){
+        var copy = _.clone(facetRow)
+        copy[1] = _.isFunction(overrider) ? overrider(copy) : copy[0]
+        return copy
+      })
+    }
+
     var hash = {}
     var inclusionsMap = {included: 1, excluded: -1, undecided: 0}
     switch(facetType) {
@@ -216,18 +226,17 @@ angular.module('rayyan.remote.service', [])
           return M.labelPredicate(facetRow[1])
         })
         hash.labels = partitions[0]
-        hash.reasons = _.map(partitions[1], function(facetRow){
-          var copy = _.clone(facetRow)
-          copy[0] = M.cleanExclusionReason(copy[0])
-          return copy
+        hash.reasons = partitions[1]
+        _.each(hash.reasons, function(facetRow){
+          facetRow[0] = M.cleanExclusionReason(facetRow[[0]])
         })
       break;
       case 'keyphrases':
-        hash.topics = facet.collection
+        hash.topics = overrideValues(facet.collection)
       break;
       case 'highlights':
         _.each(facet, function(collection, key){
-          hash['highlights_' + key] = collection
+          hash['highlights_' + key] = overrideValues(collection)
         })
       break;
       default:

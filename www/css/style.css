@@ -69,12 +69,38 @@ ion-spinner.review-download-pending svg{
 
 .decisions-chart {
   position: absolute;
-  top: 18px;
+  top: 10px;
   left: 18px;
   max-width: 70px;
   max-height: 70px;
   width: 100%;
   height: 100%;
+}
+
+.review-item {
+  height: 90px;
+  min-height: 90px;
+  max-height: 90px;
+}
+
+.review-item>a{
+  height: 80px;
+}
+
+.review-trophy {
+  position: absolute;
+  top: -3px !important;
+  left: 37px;
+  color: blue;
+  font-size: 36px !important;
+}
+
+.review-download-progress {
+  margin: 0 auto 0 auto;
+}
+
+.review-icons>i {
+  top: -6px !important;
 }
 
 .has-footer {
@@ -101,8 +127,15 @@ ion-spinner.review-download-pending svg{
 
 .pending-actions-count {
   position: absolute;
-  right: 5px;
+  right: 30px;
   top: 5px;
+}
+
+.pending-actions-count-icon{
+  position: absolute;
+  right: 5px;
+  top: 2px;
+  font-size: 24px;
 }
 
 ion-spinner.journal-processing-pending svg{
@@ -111,28 +144,36 @@ ion-spinner.journal-processing-pending svg{
   stroke: white;
 }
 
+.journal-processing-pending i {
+  position: absolute;
+  font-size: 24px;
+  top: 0px;
+}
+
 .item-input-wrapper.facet-search-wrapper {
   padding-right: 0;
 }
 
 .facet-search-title {
-  margin-right: 8px;
+  /*margin-right: 8px;*/
+  min-width: 60px;
+  text-align: right;
 }
 
 .facet-search-box {
-  background-color: white;
+  /*background-color: white;*/
   width: 100%;
+  padding: 0 10px !important;
 }
 
 .facet-search-icon {
-  background-color: white;
   line-height: 37px;
   padding-left: 6px;
   padding-right: 6px;
 }
 
 .facet-search-clear-button {
-  min-width: inherit;
+  /*min-width: inherit;*/
 }
 
 .list:last-child.card.facet-card{
@@ -174,7 +215,8 @@ ion-spinner.journal-processing-pending svg{
 .highlight-category-search {
   background-color: yellow;
   color: black;
-  padding: 0 3px 0 3px;
+  padding: 0;
+  /*border: 1px solid black;*/
 }
 
 .highlight-hidden {
@@ -186,4 +228,36 @@ ion-spinner.journal-processing-pending svg{
 .abstract {
   text-align: justify; 
   text-justify: distribute;
+}
+
+.article-counter {
+  float: right;
+  border-radius: 5px;
+  padding: 3px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+}
+
+.articles-error {
+  background-color: red;
+  color: white;
+  font-weight: bold;
+}
+
+.articles-warning {
+  background-color: blue;
+  color: white;
+  font-weight: bold;
+}
+
+.articles-congrats {
+  background-color: green;
+  color: white;
+  font-weight: bold;
+}
+
+.reviews-updated-at {
+  float: right;
+  font-size: 12px;
 }
