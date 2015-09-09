@@ -87,7 +87,7 @@
     <div ng-if="noMoreArticlesAvailable && !errorLoadingMore && !download_pending && !no_remote_filtering" class="item item-body {{facetCount==0 ? 'articles-congrats' : 'articles-warning'}}">
       <span ng-if="facetCount==0">Congratulations, you have reached the end of this review, no more articles to screen, Yay!</span>
       <span ng-if="facetCount>0">No more articles to screen. Note that you have {{facetCount}}
-      filter{{facetCount==1?'':'s'}} active. To get more articles, change your filter{{facetCount==1?'':'s'}}.</span>
+      active filter{{facetCount==1?'':'s'}}. To get more articles, change your filter{{facetCount==1?'':'s'}}.</span>
     </div>
 
     <div ng-if="errorLoadingMore" class="item item-body articles-error">
