@@ -354,6 +354,7 @@ angular.module('rayyan.services', ['rayyan.local.service', 'rayyan.remote.servic
     },
     loggedIn: rayyanLocalService.loggedIn,
     getDisplayName: rayyanLocalService.getDisplayName,
+    getUserId: rayyanLocalService.getUserId,
     getReviews: getReviews,
     getReview: rayyanLocalService.getReview,
     getArticles: getArticles,

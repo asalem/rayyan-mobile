@@ -141,8 +141,10 @@ angular.module('rayyan.remote.service', [])
           ref.close();
           var code = (event.url).split("code=")[1];
           continueAuth(code).then(function(){
-            deferred.resolve()
             getUserInfo()
+              .finally(function(){
+                deferred.resolve()
+              })
           }, function(){
             deferred.reject()
           })
@@ -180,8 +182,10 @@ angular.module('rayyan.remote.service', [])
       .then(function(data){
         console.log("got data from getUserInfo", data)
         $localStorage.displayName = data.displayName
+        $localStorage.userId = data.userId
       }, function(data) {
         $localStorage.displayName = "Unknown"
+        $localStorage.userId = 0
       })
   }
 

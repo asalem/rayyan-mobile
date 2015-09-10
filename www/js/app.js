@@ -4,9 +4,9 @@
 // 'rayyan' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'rayyan.controllers' is found in controllers.js
-angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services'])
+angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services', 'ngCordova'])
 
-.run(function($rootScope, $ionicPlatform, rayyanAPIService) {
+.run(function($rootScope, $ionicPlatform, rayyanAPIService, $cordovaGoogleAnalytics) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -23,6 +23,13 @@ angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.se
         // broadcast rayyan service ready
         $rootScope.$broadcast("rayyan.ready")
       })
+
+    // Google Analytics
+    if (window.cordova) {
+      $cordovaGoogleAnalytics.startTrackerWithId('UA-55160701-4');
+      // TODO remove debug later
+      $cordovaGoogleAnalytics.debugMode();
+    }
   });
 })
 

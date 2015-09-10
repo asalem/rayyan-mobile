@@ -1,8 +1,24 @@
-angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
+angular.module('reviews.controller', ['chart.js', 'rayyan.services', 'ngCordova'])
 
-.controller('ReviewsController', function($rootScope, $scope, $location, 
-  rayyanAPIService, $ionicListDelegate, $localStorage, $ionicPopup) {
+.controller('ReviewsController', function($rootScope, $scope, $location, $ionicPlatform,
+  rayyanAPIService, $ionicListDelegate, $localStorage, $ionicPopup, $cordovaGoogleAnalytics) {
 
+  var trackView = function() {
+    console.log("in trackView for Reviews")
+    if (window.cordova) {
+      $ionicPlatform.ready(function() {
+        $cordovaGoogleAnalytics.trackView('Reviews');
+      })
+    }
+  }
+
+  var trackEvent = function(action) {
+    $ionicPlatform.ready(function() {
+      if (window.cordova)
+        $cordovaGoogleAnalytics.trackEvent('ReviewDownload', action)
+    })
+  }
+  
   $rootScope.reviewFullyDownloaded = function(review) {
     return review.total_articles > 0 && review.downloaded_articles >= review.total_articles
   }
@@ -108,6 +124,8 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     if (!rayyanAPIService.loggedIn()) {
       $location.path("/app/login")
     }
+    else
+      trackView()
   });
 
   $scope.$on("rayyan.ready", function() {  
@@ -146,13 +164,13 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     }
     else {
       console.log("start download")
-
       rayyanAPIService.getFacets(review, null, "remote")
-
+      trackEvent(review.downloaded_articles == 0 ? 'started' : 'resumed')
       rayyanAPIService.downloadReviewArticles(review)
         .then(function(){
           // to move downloaded review to the offline group
           setReviews($rootScope.reviews)
+          trackEvent(review.downloaded_articles >= review.total_articles ? 'finished' : 'stopped')
         }, function(error){
           var message = ""
           switch(error) {
@@ -169,6 +187,7 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
             title: "Error",
             template: message
           })
+          trackEvent('failed:' + error)
         })
     }
     $event.preventDefault();
@@ -180,6 +199,7 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services'])
     // to move cleared review to the online group
     setReviews($rootScope.reviews)
     $ionicListDelegate.closeOptionButtons();
+    trackEvent('cleared')
   }
 
 });

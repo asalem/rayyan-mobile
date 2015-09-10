@@ -1,6 +1,6 @@
-angular.module('facets.controller', [])
+angular.module('facets.controller', ['ngCordova'])
 
-.controller('FacetsController', function($rootScope, $scope, $ionicScrollDelegate) {
+.controller('FacetsController', function($rootScope, $scope, $ionicScrollDelegate, $ionicPlatform, $cordovaGoogleAnalytics) {
 
   var searchFacets = {
     search: 'All',
@@ -16,6 +16,15 @@ angular.module('facets.controller', [])
     inclusions: "Inclusion decisions",
     labels: "Labels",
     reasons: "Exclusion reasons"
+  }
+
+  var trackView = function() {
+    console.log("in trackView for Filters")
+    if (window.cordova) {
+      $ionicPlatform.ready(function() {
+        $cordovaGoogleAnalytics.trackView('Filters');
+      })
+    }
   }
 
   var updateListFacetsItems = function() {
@@ -90,9 +99,11 @@ angular.module('facets.controller', [])
   $scope.$on('modal.shown', function(e) {
     $ionicScrollDelegate.$getByHandle('facetsContent').scrollTop();
     updateListFacetsItems()
+    trackView()
   })
   
   $scope.$on('facets.updated', function(e) {
     updateListFacetsItems()
   })
+
 })

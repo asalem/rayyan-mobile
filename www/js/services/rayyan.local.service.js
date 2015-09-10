@@ -109,6 +109,9 @@ angular.module('rayyan.local.service', ['rayyan.remote.service'])
     getDisplayName: function() {
       return $localStorage.displayName;
     },
+    getUserId: function() {
+      return $localStorage.userId;
+    },
     getReviews: function() {
       return getReady().then(function(){
         return M.getReviews($q)

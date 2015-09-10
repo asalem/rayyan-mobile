@@ -23,7 +23,8 @@
     "cordova-sqlite-storage",
     "cordova-plugin-inappbrowser",
     "cordova-plugin-network-information",
-    "nl.x-services.plugins.socialsharing"
+    "nl.x-services.plugins.socialsharing",
+    "cordova-plugin-google-analytics"
   ],
   "cordovaPlatforms": [
     "ios",

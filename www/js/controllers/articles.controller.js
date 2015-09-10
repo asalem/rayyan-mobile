@@ -1,8 +1,8 @@
-angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', 'rayyan.utils'])
+angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', 'rayyan.utils', 'ngCordova'])
 
 .controller('ArticleController', function($rootScope, $scope, $stateParams,
-  rayyanAPIService, rayyanHighlightsManager, $ionicSideMenuDelegate,
-  $ionicModal, $ionicScrollDelegate, $filter, $ionicPopup) {
+  rayyanAPIService, rayyanHighlightsManager, $ionicSideMenuDelegate, $ionicPlatform,
+  $ionicModal, $ionicScrollDelegate, $filter, $ionicPopup, $cordovaGoogleAnalytics) {
   
   var BATCH_SIZE = 5;
   var LONG_STR_LIMIT = 200
@@ -32,6 +32,15 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     authorSearchHighlightManager,
     abstractSearchHighlightManager,
     topicsSearchHighlightManager
+
+  var trackView = function() {
+    console.log("in trackView for Articles")
+    if (window.cordova) {
+      $ionicPlatform.ready(function() {
+        $cordovaGoogleAnalytics.trackView('Articles');
+      })
+    }
+  }
 
   $scope.articlesTotal = review.total_articles;
 
@@ -121,6 +130,8 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     $scope.articles = []
     $ionicScrollDelegate.$getByHandle('articlesContent').scrollTop();
     $scope.filtersView.hide();
+
+    trackView()
   };
   //Cleanup the modal when we're done with it!
   $scope.$on('$destroy', function() {
@@ -343,5 +354,9 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
       $scope.$emit("menuOpen")
     }
   })
+
+  $scope.$on('$ionicView.enter', function(e) {
+    trackView()
+  });
 
 });

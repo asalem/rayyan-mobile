@@ -1,12 +1,34 @@
 angular.module('menu.controller', ['rayyan.services', 'ngCordova'])
 
-.controller('MenuController', function($scope, rayyanAPIService, $ionicPlatform, $cordovaSocialSharing) {
+.controller('MenuController', function($scope, rayyanAPIService, $ionicPlatform, $cordovaSocialSharing, $cordovaGoogleAnalytics) {
   $scope.loggedIn = rayyanAPIService.loggedIn;
   $scope.getDisplayName = rayyanAPIService.getDisplayName;
 
-  $scope.openLink = function(url) {
+  var trackEvent = function(action) {
+    $ionicPlatform.ready(function() {
+      if (window.cordova)
+        $cordovaGoogleAnalytics.trackEvent('Menu', action)
+    })
+  }
+  
+  if (window.cordova) {
+    $ionicPlatform.ready(function() {
+      var userId = rayyanAPIService.getUserId()
+      if (userId) {
+        console.log("setting initial userId for GA", userId)
+        $cordovaGoogleAnalytics.setUserId(userId);
+      }
+    })
+  }
+
+  $scope.openLink = function(action, url) {
     $ionicPlatform.ready(function(){
-      (window.cordova ? cordova.InAppBrowser : window).open(url, '_system');
+      if (window.cordova) {
+        cordova.InAppBrowser.open(url, '_system')
+        trackEvent(action)
+      }
+      else
+        window.open(url, '_system');
     })
   }
 
@@ -16,6 +38,7 @@ angular.module('menu.controller', ['rayyan.services', 'ngCordova'])
       var message = "Rayyan QCRI is a free mobile/web app to help systematic review authors (offline) screen citations quickly @rayyanapp"
       var link = "http://rayyan.qcri.org"
       $cordovaSocialSharing.share(message, subject, null, link);
+      trackEvent('share_app')
     }
     else
       alert("This does not work in browser, try a mobile simulator/device")
