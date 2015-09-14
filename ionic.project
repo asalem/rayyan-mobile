@@ -1,4 +1,11 @@
 {
   "name": "Rayyan QCRI",
-  "app_id": "org.qcri.rayyan"
+  "app_id": "org.qcri.rayyan",
+  "browsers": [
+    {
+      "platform": "android",
+      "browser": "crosswalk",
+      "version": "14.42.334.0"
+    }
+  ]
 }
