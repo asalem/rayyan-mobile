@@ -148,13 +148,6 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
   $scope.facetCount = 0
   // End modal filters view functions
 
-  rayyanAPIService.getFacets(review, null, "local")
-    .then(function(facets){
-      installFacets(facets)
-      rayyanAPIService.getFacets(review)
-        .then(installFacets)
-    })
-
   var highlightField = function(manager, input, klass) {
     return manager ? manager.highlight(input, klass || "highlight-category-search", true) : input
   }
@@ -187,6 +180,9 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     articlesOffset += articles.length
   }
 
+  rayyanAPIService.getFacets(review, null, "local")
+    .then(installFacets)
+
   $scope.loadMore = function() {
     console.log("in loadMore, facetValues", $scope.facetValues)
     $scope.errorLoadingMore = false;
@@ -197,10 +193,19 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
       .then(function(articles){
         $scope.articlesTotal = articles.pop()
         console.log("resolved by articles", articles)
+
+        // get facets if this is the first batch of articles
+        if (articlesOffset < BATCH_SIZE) {
+          console.log("First batch, getting remote facets")
+          rayyanAPIService.getFacets(review)
+            .then(installFacets)
+        }
+
         if (articles.length == 0)
           $scope.noMoreArticlesAvailable = true;
         else
           appendArticlesToScope(articles)
+
       }, function(error){
         $scope.noMoreArticlesAvailable = true;
         switch(error) {
@@ -348,6 +353,9 @@ angular.module('articles.controller', ['rayyan.services', 'rayyan.directives', '
     if (!isOpen && wasOpen) {
       // menu closed, apply labels
       applyLabelModels($rootScope.labelModels, originalArticleLabels, labelPrefix)
+      // ionic bug: if user last interaction after typing in search, was checkbox, then menu closes: keyboard doesn't auto dismiss
+      if (window.cordova && window.cordova.plugins.Keyboard)
+        window.cordova.plugins.Keyboard.close();
     }
     else if (isOpen && !wasOpen) {
       // menu opened

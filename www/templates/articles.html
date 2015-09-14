@@ -40,7 +40,7 @@
           </h2>
         </div>
         <div ng-if="article.topics">
-          <h3 ng-bind-html="'Topics: ' + limit(highlightTopics(highlight2(highlight1(article.topics))))">
+          <h3 ng-bind-html="'Topics: ' + highlightTopics(highlight2(highlight1(limit(article.topics))))">
           </h3>
         </div>
         <p>
