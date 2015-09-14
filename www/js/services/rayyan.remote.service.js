@@ -1,6 +1,12 @@
 angular.module('rayyan.remote.service', [])
 
-.factory('rayyanRemoteService', function($http, $localStorage, $ionicPlatform, $q) {
+.constant('DEMO_BASE_URI', 'http://rayyan.qcridemos.org')
+.constant('PRODUCTION_BASE_URI', 'http://127.0.0.1:5000')
+// .constant('PRODUCTION_BASE_URI', 'http://rayyan.qcri.org')
+// TODO in production, enable real production url
+
+.factory('rayyanRemoteService', function($http, $localStorage, $ionicPlatform, $q,
+  DEMO_BASE_URI, PRODUCTION_BASE_URI) {
 
   var clientId = "b174200899509ee7a4d90d7457c6ea63bbb8a79ed1059753adc100bd0b685d63"
   var clientSecret = "e1f17b03e0e36446917e50598544cff58dff03ea48dd1d5ee364fdb7d9f6f19a"
@@ -74,9 +80,12 @@ angular.module('rayyan.remote.service', [])
     }, function(response) {
       console.log("error in http with status", response.status)
       if (!noRefreshToken && response.status == 401) {
-        console.log("Got 401, accessToken must have been expired, trying to refresh")
+        console.log("Got 401, accessToken [1] must have been expired, trying to refresh using [2], full response [3]",
+          accessToken, $localStorage.refreshToken, JSON.stringify(response))
         continueAuth($localStorage.refreshToken, true)
           .then(function(){
+            console.log("Succeeded in refreshing token and got new token [1] with refresh token [2]",
+              accessToken, $localStorage.refreshToken)
             request(method, endpoint, data)
               .then(function(responseData){
                 deferred.resolve(responseData)
@@ -87,6 +96,10 @@ angular.module('rayyan.remote.service', [])
               })
           }, function(response){
             // failed to refresh accessToken, may be user revoked client, must re-login
+            // TODO: sometimes if 2 requests are done in parallel, both will give 401, one will refresh and succeed
+            // the other will refresh (the now outdated token) and fail, cause login screen to appear
+            console.log("Got 401 again, could not refresh token, user may have revoked access, must re-login, here is response", 
+              JSON.stringify(response))
             deferred.reject(response)
             reportError(method, endpoint, data, response)
             startAuth(); // relogin
@@ -112,16 +125,7 @@ angular.module('rayyan.remote.service', [])
   }
 
   var setBaseURI = function(demo) {
-    if (demo)
-      baseURI = "http://rayyan.qcridemos.org";
-    else {
-      // baseURI = "http://127.0.0.1:5000"
-      // baseURI = "http://10.153.236.32:5000"
-      // baseURI = "http://10.5.3.205:5000"
-      // baseURI = "http://rayyan.qcri.org"
-      baseURI = "http://192.168.100.31:5000"
-      // baseURI = "http://172.20.10.11:5000"
-    }
+    baseURI = demo ? DEMO_BASE_URI : PRODUCTION_BASE_URI
     $localStorage.baseURI = baseURI;
   }
 
