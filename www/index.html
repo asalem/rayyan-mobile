@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <meta name="format-detection" content="telephone=no">
     <title></title>
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
@@ -72,8 +73,8 @@
         <span ng-if="journalProcessing" class="journal-processing-pending">
             <i class="icon {{journalProcessingIcon()}}"></i>
         </span>
-        <span ng-if="pendingActionsCount > 0" class="pending-actions-count">{{pendingActionsCount}}</span>
-        <span ng-if="pendingActionsCount > 0" class="pending-actions-count-icon">
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count {{platform}}">{{pendingActionsCount}}</span>
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count-icon {{platform}}">
             <i class="icon {{pendingActionsIcon()}}"></i>
         </span>
     </ion-footer-bar>

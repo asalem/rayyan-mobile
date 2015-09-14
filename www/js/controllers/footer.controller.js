@@ -16,7 +16,6 @@ angular.module('footer.controller', ['rayyan.services'])
       }, function(pendingActionsCount){
         console.log("processJournalPlans notification, pendingActionsCount", pendingActionsCount)
         $rootScope.pendingActionsCount = pendingActionsCount;
-        // try{$scope.$apply();}catch(e){}
       })
       .finally(function(){
         console.log("processJournalPlans finally")
@@ -33,8 +32,6 @@ angular.module('footer.controller', ['rayyan.services'])
       $scope.footerText = "Offline"
     }
     console.log("network", status);
-    // manually call $apply because $ionicPlatform.on happens outside angular loop
-    $scope.$apply();
   }
 
   // $ionicPlatform.ready(function() {
@@ -64,6 +61,8 @@ angular.module('footer.controller', ['rayyan.services'])
     $ionicPlatform.on("online", function(){
       setConnectionStatus('online');
       processJournal();
+      // manually call $apply because $ionicPlatform.on happens outside angular loop
+      $scope.$apply();
     })
 
     $scope.footerClicked = function() {
@@ -74,6 +73,8 @@ angular.module('footer.controller', ['rayyan.services'])
 
   $ionicPlatform.on("offline", function(){
     setConnectionStatus('offline');
+    // manually call $apply because $ionicPlatform.on happens outside angular loop
+    $scope.$apply();
   })
 
   $scope.journalProcessingIcon = function() {
@@ -86,5 +87,6 @@ angular.module('footer.controller', ['rayyan.services'])
 
   $rootScope.pendingActionsCount = 0;
   $scope.footerText = "Initializing...";
+  $scope.platform = ionic.Platform.isIOS() ? "ios" : "android"
 
 })

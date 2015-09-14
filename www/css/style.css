@@ -71,6 +71,7 @@ ion-spinner.review-download-pending svg{
   max-height: 70px;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 .review-item {
@@ -86,9 +87,9 @@ ion-spinner.review-download-pending svg{
 .review-trophy {
   position: absolute;
   top: -5px !important;
-  left: 31px;
+  left: 36px;
   color: blue;
-  font-size: 50px !important;
+  font-size: 40px !important;
 }
 
 .review-download-progress {
@@ -123,15 +124,29 @@ ion-spinner.review-download-pending svg{
 
 .pending-actions-count {
   position: absolute;
-  right: 30px;
   top: 5px;
 }
 
-.pending-actions-count-icon{
+.pending-actions-count.ios {
+  right: 30px;
+}
+
+.pending-actions-count.android {
+  right: 32px;
+}
+
+.pending-actions-count-icon {
   position: absolute;
   right: 5px;
-  top: 2px;
   font-size: 24px;
+}
+
+.pending-actions-count-icon.ios {
+  top: 2px;
+}
+
+.pending-actions-count-icon.android {
+  top: 0;
 }
 
 ion-spinner.journal-processing-pending svg{
