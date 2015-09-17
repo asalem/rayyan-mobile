@@ -1,8 +1,9 @@
 angular.module('rayyan.remote.service', [])
 
 .constant('DEMO_BASE_URI', 'http://rayyan.qcridemos.org')
-.constant('PRODUCTION_BASE_URI', 'http://127.0.0.1:5000')
-// .constant('PRODUCTION_BASE_URI', 'http://rayyan.qcri.org')
+// .constant('PRODUCTION_BASE_URI', 'http://127.0.0.1:5000')
+// .constant('PRODUCTION_BASE_URI', 'http://192.168.100.6:5000')
+.constant('PRODUCTION_BASE_URI', 'http://rayyan.qcri.org')
 // TODO in production, enable real production url
 
 .factory('rayyanRemoteService', function($http, $localStorage, $ionicPlatform, $q,
