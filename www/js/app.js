@@ -4,7 +4,7 @@
 // 'rayyan' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'rayyan.controllers' is found in controllers.js
-angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services', 'ngCordova'])
+angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services', 'ngCordova', 'ngIOS9UIWebViewPatch'])
 
 .run(function($rootScope, $ionicPlatform, rayyanAPIService, $cordovaGoogleAnalytics) {
   $ionicPlatform.ready(function() {

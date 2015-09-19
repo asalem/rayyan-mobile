@@ -14,7 +14,7 @@
         <ion-item ng-if="reviewGroup.reviews.length == 0" class="item item-body">
           {{reviewGroup.emptyMessage}}
         </ion-item>
-        <ion-item href="#" ng-click="reviewClicked(review)"
+        <ion-item ng-click="reviewClicked(review)"
         class="review-item item item-icon-right item-thumbnail-left" ng-repeat="review in reviewGroup.reviews">
           <div ng-if="shouldDrawChart(review)">
             <canvas
