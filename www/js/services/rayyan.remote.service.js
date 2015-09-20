@@ -1,18 +1,26 @@
 angular.module('rayyan.remote.service', [])
 
-.constant('DEMO_BASE_URI', 'http://rayyan.qcridemos.org')
-// .constant('PRODUCTION_BASE_URI', 'http://127.0.0.1:5000')
-// .constant('PRODUCTION_BASE_URI', 'http://192.168.100.6:5000')
-.constant('PRODUCTION_BASE_URI', 'http://rayyan.qcri.org')
 // TODO in production, enable real production url
+.constant('PRODUCTION_CONFIG', {
+  authBaseURI: 'https://127.0.0.1:5100',
+  baseURI: 'http://127.0.0.1:5000',
+  clientId: 'b174200899509ee7a4d90d7457c6ea63bbb8a79ed1059753adc100bd0b685d63',
+  clientSecret: 'e1f17b03e0e36446917e50598544cff58dff03ea48dd1d5ee364fdb7d9f6f19a',
+  redirectURI: 'http://localhost/callback'
+})
+
+.constant('DEMO_CONFIG', {
+  authBaseURI: 'http://rayyan.qcridemos.org',
+  baseURI: 'http://rayyan.qcridemos.org',
+  clientId: 'b174200899509ee7a4d90d7457c6ea63bbb8a79ed1059753adc100bd0b685d63',
+  clientSecret: 'e1f17b03e0e36446917e50598544cff58dff03ea48dd1d5ee364fdb7d9f6f19a',
+  redirectURI: 'http://localhost/callback'
+})
 
 .factory('rayyanRemoteService', function($http, $localStorage, $ionicPlatform, $q,
-  DEMO_BASE_URI, PRODUCTION_BASE_URI) {
+  DEMO_CONFIG, PRODUCTION_CONFIG) {
 
-  var clientId = "b174200899509ee7a4d90d7457c6ea63bbb8a79ed1059753adc100bd0b685d63"
-  var clientSecret = "e1f17b03e0e36446917e50598544cff58dff03ea48dd1d5ee364fdb7d9f6f19a"
-  var redirectURI = "http://localhost/callback"
-  var baseURI = $localStorage.baseURI,
+  var config = $localStorage.config,
       accessToken = $localStorage.accessToken
   $http.defaults.headers.common['Content-Type'] = 'application/json';
 
@@ -55,11 +63,11 @@ angular.module('rayyan.remote.service', [])
     console.log("ERROR IN REQUEST", method, endpoint, data, response)
   }
 
-  var request = function(method, endpoint, data, noRefreshToken) {
+  var request = function(method, endpoint, data, noRefreshToken, useAuthBaseURI) {
     var deferred = $q.defer();
     var req = {
       method: method,
-      url: baseURI + endpoint,
+      url: (useAuthBaseURI ? config.authBaseURI : config.baseURI) + endpoint,
       headers: {
         "Authorization": "Bearer " + accessToken
       }
@@ -126,8 +134,8 @@ angular.module('rayyan.remote.service', [])
   }
 
   var setBaseURI = function(demo) {
-    baseURI = demo ? DEMO_BASE_URI : PRODUCTION_BASE_URI
-    $localStorage.baseURI = baseURI;
+    config = demo ? DEMO_CONFIG : PRODUCTION_CONFIG
+    $localStorage.config = config
   }
 
   var login = function(demo) {
@@ -139,10 +147,10 @@ angular.module('rayyan.remote.service', [])
     var deferred = $q.defer()
     // https://blog.nraboy.com/2014/07/using-oauth-2-0-service-ionicframework/
     $ionicPlatform.ready(function() {
-      var authorizeURI = baseURI + "/oauth/authorize?client_id="+clientId+"&redirect_uri="+redirectURI+"&response_type=code"
+      var authorizeURI = config.authBaseURI + "/oauth/authorize?client_id="+config.clientId+"&redirect_uri="+config.redirectURI+"&response_type=code"
       var ref = (window.cordova ? cordova.InAppBrowser : window).open(authorizeURI, '_blank', 'location=yes,clearsessioncache=yes,clearcache=yes');
       ref.addEventListener('loadstart', function(event) {
-        if((event.url).indexOf(redirectURI) == 0) {
+        if((event.url).indexOf(config.redirectURI) == 0) {
           ref.close();
           var code = (event.url).split("code=")[1];
           continueAuth(code).then(function(){
@@ -161,9 +169,9 @@ angular.module('rayyan.remote.service', [])
 
   var continueAuth = function(code, refresh) {
     var data = {
-      client_id: clientId,
-      client_secret: clientSecret,
-      redirect_uri: redirectURI,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      redirect_uri: config.redirectURI,
       grant_type: 'authorization_code',
       code: code 
     }
@@ -171,7 +179,7 @@ angular.module('rayyan.remote.service', [])
       data.grant_type = "refresh_token";
       data.refresh_token = code;
     }
-    return request('POST', '/oauth/token', data, true)
+    return request('POST', '/oauth/token', data, true, true)
       .then(function(data) {
         // data = {"access_token":"...","token_type":"bearer","expires_in":7200,"refresh_token":"...","created_at":1440919170}
         setAccessToken(data.access_token, data.refresh_token)
@@ -179,7 +187,7 @@ angular.module('rayyan.remote.service', [])
   }
 
   var revoke = function() {
-    return request('POST', '/oauth/revoke', {token: accessToken})
+    return request('POST', '/oauth/revoke', {token: accessToken}, false, true)
   }
 
   var getUserInfo = function() {

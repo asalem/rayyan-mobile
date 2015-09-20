@@ -76,6 +76,8 @@
     <config-file platform="ios" target="*-Info.plist" parent="NSAppTransportSecurity">
       <key>NSAppTransportSecurity</key>
       <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
         <key>NSExceptionDomains</key>
         <dict>
           <key>rayyan.qcridemos.org</key>
