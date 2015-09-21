@@ -95,8 +95,15 @@
             <true/>
             <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
             <true/>
+            <key>NSTemporaryExceptionRequiresForwardSecrecy</key>
+            <false/>
+          </dict>
+          <key>seal.godaddy.com</key>
+          <dict>
             <key>NSTemporaryExceptionMinimumTLSVersion</key>
-            <string>TLSv1.1</string>
+            <string>TLSv1</string>
+            <key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+            <true/>
             <key>NSTemporaryExceptionRequiresForwardSecrecy</key>
             <false/>
           </dict>
