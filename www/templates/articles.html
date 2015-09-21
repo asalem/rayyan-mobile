@@ -91,7 +91,7 @@
     </div>
 
     <div ng-if="errorLoadingMore" class="item item-body articles-error">
-      Error loading articles.
+      Connect to the Internet to load {{articles.length>0?'more':''}} articles.
     </div>
 
     <div ng-if="download_pending" class="item item-body articles-warning">
