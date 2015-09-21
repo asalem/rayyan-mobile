@@ -272,3 +272,21 @@ ion-spinner.journal-processing-pending svg{
   float: right;
   font-size: 12px;
 }
+
+.rayyan-header {
+  height: 58px;
+}
+
+.rayyan-title {
+  top: 8px !important;
+}
+
+.rayyan-icon {
+  background-image: url(/img/icon.png);
+  width: 48px;
+  height: 48px;
+}
+
+.menu-content.has-header {
+  top: 58px;
+}
