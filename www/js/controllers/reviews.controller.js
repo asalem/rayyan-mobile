@@ -124,8 +124,10 @@ angular.module('reviews.controller', ['chart.js', 'rayyan.services', 'ngCordova'
     if (!rayyanAPIService.loggedIn()) {
       $location.path("/app/login")
     }
-    else
+    else {
+      setReviews($rootScope.reviews)
       trackView()
+    }
   });
 
   $scope.$on("rayyan.ready", function() {  
