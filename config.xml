@@ -121,6 +121,9 @@
       </dict>
     </config-file>
     
+    <config-file platform="ios" target="*-Info.plist" parent="UIRequiresFullScreen">
+      <string>YES</string>
+    </config-file>
   </platform>
   <icon src="resources/android/icon/drawable-xhdpi-icon.png"/>
 </widget>

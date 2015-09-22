@@ -6,13 +6,7 @@
     <meta name="format-detection" content="telephone=no">
     <title></title>
 
-    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="lib/angular-chart.js/dist/angular-chart.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-
-    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
-    <link href="css/ionic.app.css" rel="stylesheet">
-    -->
 
     <script src="lib/ionic/js/ionic.bundle.js"></script>
     <script src="lib/angular-ios9-uiwebview.patch.js"></script>
@@ -28,6 +22,7 @@
     <script src="lib/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="lib/squel/squel.min.js"></script>
     <script src="lib/moment/moment.js"></script>
+    <script src="lib/angular-load/angular-load.min.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="lib/ngCordova/dist/ng-cordova.min.js"></script>
@@ -72,11 +67,11 @@
         {{footerText}}
         &nbsp;
         <span ng-if="journalProcessing" class="journal-processing-pending">
-            <i class="icon {{journalProcessingIcon()}}"></i>
+            <i class="icon journal-sync"></i>
         </span>
-        <span ng-if="pendingActionsCount > 0" class="pending-actions-count {{platform}}">{{pendingActionsCount}}</span>
-        <span ng-if="pendingActionsCount > 0" class="pending-actions-count-icon {{platform}}">
-            <i class="icon {{pendingActionsIcon()}}"></i>
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count">{{pendingActionsCount}}</span>
+        <span ng-if="pendingActionsCount > 0" class="pending-actions-count-icon">
+            <i class="icon pending-actions-icon"></i>
         </span>
     </ion-footer-bar>
 

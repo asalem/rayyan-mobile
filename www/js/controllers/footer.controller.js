@@ -77,16 +77,7 @@ angular.module('footer.controller', ['rayyan.services'])
     $scope.$apply();
   })
 
-  $scope.journalProcessingIcon = function() {
-    return ionic.Platform.isIOS() ? 'ion-ios-loop-strong' : 'ion-android-sync';
-  }
-
-  $scope.pendingActionsIcon = function() {
-    return ionic.Platform.isIOS() ? 'ion-ios-cloud-upload' : 'ion-android-upload';
-  }
-
   $rootScope.pendingActionsCount = 0;
   $scope.footerText = "Initializing...";
-  $scope.platform = ionic.Platform.isIOS() ? "ios" : "android"
 
 })

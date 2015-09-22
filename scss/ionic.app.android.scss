@@ -1,0 +1,30 @@
+@import "scss/ionic.app.scss";
+
+.pending-actions-count {
+  position: absolute;
+  top: 5px;
+  right: 32px;
+}
+
+.pending-actions-count-icon {
+  position: absolute;
+  right: 5px;
+  font-size: 24px;
+  top: 0;
+}
+
+.rayyan-header {
+  height: 58px !important;
+}
+
+.menu-content.has-header {
+  top: 58px !important;
+}
+
+.journal-sync {
+  @extend .ion-android-sync;
+}
+
+.pending-actions-icon {
+  @extend .ion-android-upload;
+}

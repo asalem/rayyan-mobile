@@ -4,9 +4,13 @@
 // 'rayyan' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'rayyan.controllers' is found in controllers.js
-angular.module('rayyan', ['ionic', 'ngStorage', 'rayyan.controllers', 'rayyan.services', 'ngCordova', 'ngIOS9UIWebViewPatch'])
+angular.module('rayyan', ['ionic', 'ngStorage', 'ngCordova', 
+  'ngIOS9UIWebViewPatch', 'angularLoad', 'rayyan.controllers', 'rayyan.services'])
 
-.run(function($rootScope, $ionicPlatform, rayyanAPIService, $cordovaGoogleAnalytics) {
+.run(function($rootScope, $ionicPlatform, rayyanAPIService, $cordovaGoogleAnalytics, angularLoad) {
+
+  angularLoad.loadCSS("css/ionic.app."+ionic.Platform.platform()+".min.css")
+
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
