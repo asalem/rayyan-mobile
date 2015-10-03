@@ -9,7 +9,15 @@ angular.module('rayyan', ['ionic', 'ngStorage', 'ngCordova',
 
 .run(function($rootScope, $ionicPlatform, rayyanAPIService, $cordovaGoogleAnalytics, angularLoad) {
 
-  angularLoad.loadCSS("css/ionic.app."+ionic.Platform.platform()+".min.css")
+  var platform = ionic.Platform.platform();
+  switch(platform) {
+    case "android":
+    case "ios":
+    // add more supported platforms here if they have css in /scss folder
+    default:
+      platform = "ios";
+  }
+  angularLoad.loadCSS("css/ionic.app."+platform+".min.css")
 
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
